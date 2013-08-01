@@ -40,7 +40,7 @@ public class DetailNewsActivity extends SherlockFragmentActivity {
 	}
 
 	public void abrirSite(View v) {
-		Intent it = new Intent(Intent.ACTION_VIEW, Uri.parse(news.getUrlInfo()));
+		Intent it = new Intent(Intent.ACTION_VIEW, Uri.parse(news.getUrl()));
 		startActivity(it);
 	}
 }

@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WebCachedImageView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -31,14 +31,13 @@ public class DetailNewsFragment extends SherlockFragment {
 			v = inflater.inflate(R.layout.fragment_detail_news, null);
 
 			TextView txtNome = (TextView) v.findViewById(R.id.nome);
-			TextView txtDescricao = (TextView) v.findViewById(R.id.descricao);
 
-			WebCachedImageView imgFoto = (WebCachedImageView) v
-					.findViewById(R.id.foto);
+			ImageView imgFoto = (ImageView) v.findViewById(R.id.foto);
 
-			txtNome.setText(news.getNome());
-			imgFoto.setImageUrl(news.getUrlFoto());
-			txtDescricao.setText(news.getDescricao());
+			txtNome.setText(news.getTitle());
+
+			new DownloadImageTask(imgFoto).execute(news.getThumbnail());
+
 		} else {
 			v = inflater.inflate(R.layout.fragment_detail_news_null, null);
 		}

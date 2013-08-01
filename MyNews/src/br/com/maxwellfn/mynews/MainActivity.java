@@ -35,9 +35,9 @@ public class MainActivity extends SherlockFragmentActivity implements
 
 		if (f1 == null || f2 == null || f3 == null) {
 
-			f1 = NewsListFragment.novaInstancia("carros_classicos");
-			f2 = NewsListFragment.novaInstancia("carros_esportivos");
-			f3 = NewsListFragment.novaInstancia("carros_luxo");
+			f1 = NewsListFragment.novaInstancia("");
+			f2 = NewsListFragment.novaInstancia("new");
+			f3 = NewsListFragment.novaInstancia("rising");
 
 		}
 		f1.setNewsClickListener(this);
@@ -53,10 +53,10 @@ public class MainActivity extends SherlockFragmentActivity implements
 
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		Tab aba1 = actionBar.newTab().setText("CLÁSSICOS").setTabListener(this);
-		Tab aba2 = actionBar.newTab().setText("ESPORTIVOS")
+		Tab aba1 = actionBar.newTab().setText("populares").setTabListener(this);
+		Tab aba2 = actionBar.newTab().setText("novos")
 				.setTabListener(this);
-		Tab aba3 = actionBar.newTab().setText("LUXO").setTabListener(this);
+		Tab aba3 = actionBar.newTab().setText("subindo").setTabListener(this);
 
 		actionBar.addTab(aba1);
 		actionBar.addTab(aba2);
@@ -148,7 +148,7 @@ public class MainActivity extends SherlockFragmentActivity implements
 	}
 
 	public void abrirSite(View v) {
-		Intent it = new Intent(Intent.ACTION_VIEW, Uri.parse(news.getUrlInfo()));
+		Intent it = new Intent(Intent.ACTION_VIEW, Uri.parse(news.getUrl()));
 		startActivity(it);
 	}
 

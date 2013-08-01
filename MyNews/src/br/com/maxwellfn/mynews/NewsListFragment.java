@@ -30,10 +30,12 @@ import com.actionbarsherlock.app.SherlockListFragment;
 
 public class NewsListFragment extends SherlockListFragment {
 
+	public static final String NOME_ABA = "nomeAba";
+
 	NewsSearchTask task;
 	ProgressBar progress;
 	TextView txtMensagem;
-	String tipoCarro;
+	String nomeAba;
 
 	private OnNewsClickListener newsClickListener;
 
@@ -45,8 +47,8 @@ public class NewsListFragment extends SherlockListFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (savedInstanceState != null
-				&& savedInstanceState.containsKey("tipoCarro")) {
-			tipoCarro = savedInstanceState.getString("tipoCarro");
+				&& savedInstanceState.containsKey(NOME_ABA)) {
+			nomeAba = savedInstanceState.getString(NOME_ABA);
 		}
 	}
 
@@ -57,7 +59,7 @@ public class NewsListFragment extends SherlockListFragment {
 		View layout = inflater.inflate(R.layout.fragment_list_news, null);
 		progress = (ProgressBar) layout.findViewById(R.id.progressBar1);
 		txtMensagem = (TextView) layout.findViewById(R.id.txtMensagem);
-		tipoCarro = getArguments().getString("tipoCarro");
+		nomeAba = getArguments().getString(NOME_ABA);
 
 		return layout;
 	}
@@ -65,7 +67,7 @@ public class NewsListFragment extends SherlockListFragment {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putString("tipoCarro", tipoCarro);
+		outState.putString(NOME_ABA, nomeAba);
 	}
 
 	@Override
@@ -83,7 +85,7 @@ public class NewsListFragment extends SherlockListFragment {
 
 			if (task == null) {
 				task = new NewsSearchTask();
-				task.execute(tipoCarro);
+				task.execute(nomeAba);
 			} else if (task.getStatus() == Status.RUNNING) {
 				progress.setVisibility(View.VISIBLE);
 			}
@@ -113,12 +115,12 @@ public class NewsListFragment extends SherlockListFragment {
 	}
 
 	public interface OnNewsClickListener {
-		void onNewsClick(News carro);
+		void onNewsClick(News news);
 	}
 
-	public static NewsListFragment novaInstancia(String tipoCarro) {
+	public static NewsListFragment novaInstancia(String nomeAba) {
 		Bundle params = new Bundle();
-		params.putString("tipoCarro", tipoCarro);
+		params.putString(NOME_ABA, nomeAba);
 
 		NewsListFragment newsListFragment = new NewsListFragment();
 		newsListFragment.setArguments(params);
@@ -133,8 +135,7 @@ public class NewsListFragment extends SherlockListFragment {
 
 			try {
 
-				URL url = new URL("http://livroandroid.com.br/livro/carros/"
-						+ params[0] + ".json");
+				URL url = new URL("http://i.reddit.com/" + params[0] + "/.json");
 
 				HttpURLConnection conexao = (HttpURLConnection) url
 						.openConnection();
@@ -161,18 +162,20 @@ public class NewsListFragment extends SherlockListFragment {
 			String jsonString = streamToString(inputStream);
 
 			JSONObject jsonRoot = new JSONObject(jsonString);
-			JSONObject jsonObjCarros = jsonRoot.getJSONObject("carros");
-			JSONArray jsonArrCarros = jsonObjCarros.getJSONArray("carro");
+			JSONObject jsonData = jsonRoot.getJSONObject("data");
+			JSONArray jsonChildren = jsonData.getJSONArray("children");
 
-			for (int i = 0; i < jsonArrCarros.length(); i++) {
+			for (int i = 0; i < jsonChildren.length(); i++) {
 				News news = new News();
 
-				JSONObject jsonObjCarro = jsonArrCarros.getJSONObject(i);
+				JSONObject jsonNews = jsonChildren.getJSONObject(i)
+						.getJSONObject("data");
 
-				news.setNome(jsonObjCarro.getString("nome"));
-				news.setDescricao(jsonObjCarro.getString("desc"));
-				news.setUrlInfo(jsonObjCarro.getString("url_info"));
-				news.setUrlFoto(jsonObjCarro.getString("url_foto"));
+				news.setId(jsonNews.getString("id"));
+				news.setTitle(jsonNews.getString("title"));
+				news.setAuthor(jsonNews.getString("author"));
+				news.setThumbnail(jsonNews.getString("thumbnail"));
+				news.setUrl(jsonNews.getString("url"));
 
 				resultados.add(news);
 			}
@@ -193,11 +196,11 @@ public class NewsListFragment extends SherlockListFragment {
 			super.onPostExecute(result);
 			if (result != null) {
 
-				NewsAdapter carAdapter = new NewsAdapter(getActivity(), result);
-				setListAdapter(carAdapter);
+				NewsAdapter newsAdapter = new NewsAdapter(getActivity(), result);
+				setListAdapter(newsAdapter);
 			} else {
 				txtMensagem.setVisibility(View.VISIBLE);
-				txtMensagem.setText("Nenhum carro foi encontrado.");
+				txtMensagem.setText("Nenhuma not’cia foi encontrada.");
 
 			}
 

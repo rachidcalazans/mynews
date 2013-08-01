@@ -9,62 +9,167 @@ public class News implements Serializable {
 	 */
 	private static final long serialVersionUID = -1338834187656220329L;
 
-	private String nome;
+	private String id;
 
-	private String descricao;
+	private String title;
 
-	private String urlFoto;
+	private String author;
 
-	private String urlInfo;
+	private String thumbnail;
+
+	private String url;
+
+	private String numComments;
+
+	private String subreddit;
+
+	private String created;
+
+	private String domain;
+
+	private String score;
+
+	private String downs;
+
+	private String ups;
+
+	private String over18;
+
+	@Override
+	public String toString() {
+		return title;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	public String getThumbnail() {
+		if (thumbnail != null && thumbnail.trim().length() > 0) {
+			return thumbnail;
+		} else {
+			return "http://www.reddit.com/static/blog_snoo.png";
+		}
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getNumComments() {
+		return numComments;
+	}
+
+	public void setNumComments(String numComments) {
+		this.numComments = numComments;
+	}
+
+	public String getSubreddit() {
+		return subreddit;
+	}
+
+	public void setSubreddit(String subreddit) {
+		this.subreddit = subreddit;
+	}
+
+	public String getCreated() {
+		return created;
+	}
+
+	public void setCreated(String created) {
+		this.created = created;
+	}
+
+	public String getDomain() {
+		return domain;
+	}
+
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
+
+	public String getScore() {
+		return score;
+	}
+
+	public void setScore(String score) {
+		this.score = score;
+	}
+
+	public String getDowns() {
+		return downs;
+	}
+
+	public void setDowns(String downs) {
+		this.downs = downs;
+	}
+
+	public String getUps() {
+		return ups;
+	}
+
+	public void setUps(String ups) {
+		this.ups = ups;
+	}
+
+	public String getOver18() {
+		return over18;
+	}
+
+	public void setOver18(String over18) {
+		this.over18 = over18;
+	}
+
+	public News(String id, String title, String author, String thumbnail,
+			String url, String numComments, String subreddit, String created,
+			String domain, String score, String downs, String ups, String over18) {
+		super();
+		this.id = id;
+		this.title = title;
+		this.author = author;
+		this.thumbnail = thumbnail;
+		this.url = url;
+		this.numComments = numComments;
+		this.subreddit = subreddit;
+		this.created = created;
+		this.domain = domain;
+		this.score = score;
+		this.downs = downs;
+		this.ups = ups;
+		this.over18 = over18;
+	}
 
 	public News() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-
-	public News(String nome, String descricao, String urlFoto, String urlInfo) {
-		super();
-		this.nome = nome;
-		this.descricao = descricao;
-		this.urlFoto = urlFoto;
-		this.urlInfo = urlInfo;
-	}
-
-	public String getNome() {
-		return nome;
-	}
-
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
-
-	public String getDescricao() {
-		return descricao;
-	}
-
-	public void setDescricao(String descricao) {
-		this.descricao = descricao;
-	}
-
-	public String getUrlFoto() {
-		return urlFoto;
-	}
-
-	public void setUrlFoto(String urlFoto) {
-		this.urlFoto = urlFoto;
-	}
-
-	public String getUrlInfo() {
-		return urlInfo;
-	}
-
-	public void setUrlInfo(String urlInfo) {
-		this.urlInfo = urlInfo;
-	}
-
-	@Override
-	public String toString() {
-		return nome;
 	}
 
 }
