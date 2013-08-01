@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="4dp"
+    android:layout_marginRight="4dp" >
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="95dp"
+        android:layout_height="55dp"
+        android:gravity="center_horizontal" >
+
+        <android.view.WebCachedImageView
+            android:id="@+id/imgThumbnail"
+            android:layout_width="95dp"
+            android:layout_height="55dp"
+            android:src="@drawable/ic_launcher"
+            app:cache_mode="no_cache" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtNome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_toRightOf="@+id/linearLayout1"
+        android:layout_centerVertical="true"
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+</RelativeLayout>
