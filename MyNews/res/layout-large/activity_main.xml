@@ -10,17 +10,18 @@
     tools:context=".MainActivity" >
 
     <FrameLayout
-        android:id="@+id/conteudoAbas"
+        android:id="@+id/topicListFrame"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1" >
     </FrameLayout>
 
     <FrameLayout
-        android:id="@+id/rootDetalhe"
+        android:id="@+id/newsListsFrame"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2" >
+        android:layout_weight="2"
+       >
     </FrameLayout>
 
 </LinearLayout>

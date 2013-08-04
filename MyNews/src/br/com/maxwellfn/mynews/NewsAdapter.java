@@ -24,25 +24,32 @@ public class NewsAdapter extends ArrayAdapter<News> {
 			convertView = LayoutInflater.from(getContext()).inflate(
 					R.layout.item_list_news, null);
 			holder = new ViewHolder();
-			holder.imgThumbnail = (ImageView) convertView
-					.findViewById(R.id.imgThumbnail);
+			holder.imgNewsThumbnail = (ImageView) convertView
+					.findViewById(R.id.imgNewsThumbnail);
 
-			holder.txtNome = (TextView) convertView.findViewById(R.id.txtNome);
+			holder.txtNewsTitle = (TextView) convertView
+					.findViewById(R.id.txtNewsTitle);
+
+			holder.txtNewsSubreddit = (TextView) convertView
+					.findViewById(R.id.txtNewsSubreddit);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
 
-		new DownloadImageTask(holder.imgThumbnail).execute(news.getThumbnail());
-		
-		holder.txtNome.setText(news.getTitle());
+		new DownloadImageTask(holder.imgNewsThumbnail).execute(news
+				.getThumbnail());
+
+		holder.txtNewsTitle.setText(news.getTitle());
+		holder.txtNewsSubreddit.setText(news.getSubreddit());
 
 		return convertView;
 	}
 
 	private static class ViewHolder {
-		ImageView imgThumbnail;
-		TextView txtNome;
+		ImageView imgNewsThumbnail;
+		TextView txtNewsTitle;
+		TextView txtNewsSubreddit;
 	}
 
 }

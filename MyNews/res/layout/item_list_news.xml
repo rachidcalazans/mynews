@@ -6,29 +6,37 @@
     android:layout_marginRight="4dp" >
 
     <LinearLayout
-        android:id="@+id/linearLayout1"
+        android:id="@+id/linearLayoutNewsThumbnail"
         android:layout_width="90dp"
         android:layout_height="90dp"
-        android:gravity="center_horizontal" >
+        android:layout_alignParentLeft="true"
+        android:orientation="horizontal" >
 
         <ImageView
-            android:id="@+id/imgThumbnail"
-            android:layout_width="0dip"
+            android:id="@+id/imgNewsThumbnail"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:contentDescription="Thumbnail"
-            android:gravity="center"
+            android:contentDescription="News Thumbnail"
             android:src="@drawable/ic_launcher" />
     </LinearLayout>
 
     <TextView
-        android:id="@+id/txtNome"
+        android:id="@+id/txtNewsTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="8dp"
-        android:layout_toRightOf="@+id/linearLayout1"
-        android:text="Large Text"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:layout_toRightOf="@id/linearLayoutNewsThumbnail"
+        android:text="News Title"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/txtNewsSubreddit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtNewsTitle"
+        android:layout_toRightOf="@id/linearLayoutNewsThumbnail"
+        android:text="Subreddit"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="12sp"
+        android:textStyle="italic" />
 
 </RelativeLayout>

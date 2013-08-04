@@ -34,6 +34,16 @@ public class News implements Serializable {
 	private String ups;
 
 	private String over18;
+	
+	private String after;
+	
+	public String getAfter() {
+		return after;
+	}
+
+	public void setAfter(String after) {
+		this.after = after;
+	}
 
 	@Override
 	public String toString() {
@@ -65,7 +75,7 @@ public class News implements Serializable {
 	}
 
 	public String getThumbnail() {
-		if (thumbnail != null && thumbnail.trim().length() > 0) {
+		if (thumbnail != null && thumbnail.trim().length() > 0 && !thumbnail.equalsIgnoreCase("default")) {
 			return thumbnail;
 		} else {
 			return "http://www.reddit.com/static/blog_snoo.png";
@@ -145,25 +155,6 @@ public class News implements Serializable {
 	}
 
 	public void setOver18(String over18) {
-		this.over18 = over18;
-	}
-
-	public News(String id, String title, String author, String thumbnail,
-			String url, String numComments, String subreddit, String created,
-			String domain, String score, String downs, String ups, String over18) {
-		super();
-		this.id = id;
-		this.title = title;
-		this.author = author;
-		this.thumbnail = thumbnail;
-		this.url = url;
-		this.numComments = numComments;
-		this.subreddit = subreddit;
-		this.created = created;
-		this.domain = domain;
-		this.score = score;
-		this.downs = downs;
-		this.ups = ups;
 		this.over18 = over18;
 	}
 

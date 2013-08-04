@@ -3,8 +3,6 @@
 
     <string name="app_name">MyNews</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="title_activity_detail_news">Detalhe</string>
-    <string name="title_activity_news_tabs">NewsTabsActivity</string>
+    <string name="title_activity_smartphone_news_lists">MyNews Lists</string>
 
 </resources>

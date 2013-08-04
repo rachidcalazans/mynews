@@ -19,6 +19,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,12 +31,43 @@ import com.actionbarsherlock.app.SherlockListFragment;
 
 public class NewsListFragment extends SherlockListFragment {
 
-	public static final String NOME_ABA = "nomeAba";
+	public static final String CLASSIFICATION = "classification";
+	public static final String TOPIC = "topic";
+	public static final String AFTER = "after";
+
+	private static final int MAX_FETCH_NEWS = 10;
 
 	NewsSearchTask task;
 	ProgressBar progress;
 	TextView txtMensagem;
-	String nomeAba;
+
+	private String classification;
+	private String topic;
+	private String after;
+
+	public String getClassification() {
+		return classification;
+	}
+
+	public void setClassification(String classification) {
+		this.classification = classification;
+	}
+
+	public String getTopic() {
+		return topic;
+	}
+
+	public void setTopic(String topic) {
+		this.topic = topic;
+	}
+
+	public String getAfter() {
+		return after;
+	}
+
+	public void setAfter(String after) {
+		this.after = after;
+	}
 
 	private OnNewsClickListener newsClickListener;
 
@@ -46,9 +78,16 @@ public class NewsListFragment extends SherlockListFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (savedInstanceState != null
-				&& savedInstanceState.containsKey(NOME_ABA)) {
-			nomeAba = savedInstanceState.getString(NOME_ABA);
+		if (savedInstanceState != null) {
+			if (savedInstanceState.containsKey(CLASSIFICATION)) {
+				classification = savedInstanceState.getString(CLASSIFICATION);
+			}
+			if (savedInstanceState.containsKey(TOPIC)) {
+				topic = savedInstanceState.getString(TOPIC);
+			}
+			if (savedInstanceState.containsKey(AFTER)) {
+				after = savedInstanceState.getString(AFTER);
+			}
 		}
 	}
 
@@ -59,7 +98,9 @@ public class NewsListFragment extends SherlockListFragment {
 		View layout = inflater.inflate(R.layout.fragment_list_news, null);
 		progress = (ProgressBar) layout.findViewById(R.id.progressBar1);
 		txtMensagem = (TextView) layout.findViewById(R.id.txtMensagem);
-		nomeAba = getArguments().getString(NOME_ABA);
+		classification = getArguments().getString(CLASSIFICATION);
+		topic = getArguments().getString(TOPIC);
+		after = getArguments().getString(AFTER);
 
 		return layout;
 	}
@@ -67,7 +108,9 @@ public class NewsListFragment extends SherlockListFragment {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putString(NOME_ABA, nomeAba);
+		outState.putString(TOPIC, topic);
+		outState.putString(CLASSIFICATION, classification);
+		outState.putString(AFTER, after);
 	}
 
 	@Override
@@ -85,7 +128,7 @@ public class NewsListFragment extends SherlockListFragment {
 
 			if (task == null) {
 				task = new NewsSearchTask();
-				task.execute(nomeAba);
+				task.execute(topic, classification, after);
 			} else if (task.getStatus() == Status.RUNNING) {
 				progress.setVisibility(View.VISIBLE);
 			}
@@ -118,24 +161,48 @@ public class NewsListFragment extends SherlockListFragment {
 		void onNewsClick(News news);
 	}
 
-	public static NewsListFragment novaInstancia(String nomeAba) {
+	public static NewsListFragment novaInstancia(String topic,
+			String classification, String after) {
 		Bundle params = new Bundle();
-		params.putString(NOME_ABA, nomeAba);
+		params.putString(TOPIC, topic);
+		params.putString(CLASSIFICATION, classification);
+		params.putString(AFTER, after);
 
 		NewsListFragment newsListFragment = new NewsListFragment();
 		newsListFragment.setArguments(params);
+		newsListFragment.setTopic(topic);
+		newsListFragment.setClassification(classification);
+		newsListFragment.setAfter(after);
 
 		return newsListFragment;
 	}
 
 	class NewsSearchTask extends AsyncTask<String, Void, List<News>> {
 
+		private final String URL_TEMPLATE = "http://i.reddit.comTOPIC#CLASSIFICATION.json"
+				+ "?after=AFTER";
+
+		private String getURL(String topic, String classification, String after) {
+
+			if (topic.length() <= 0 && classification.length() > 0) {
+				topic = "/";
+			}
+			String url = URL_TEMPLATE.replace("TOPIC#", topic);
+			if (topic.length() <= 0 && classification.length() <= 0) {
+				classification = "/";
+			}
+			url = url.replace("CLASSIFICATION", classification);
+			url = url.replace("AFTER", after);
+			return url;
+		}
+
 		@Override
 		protected List<News> doInBackground(String... params) {
 
 			try {
 
-				URL url = new URL("http://i.reddit.com/" + params[0] + "/.json");
+				URL url = new URL(getURL(params[0], params[1], params[2]));
+				Log.d("MYNEWS", url.toString());
 
 				HttpURLConnection conexao = (HttpURLConnection) url
 						.openConnection();
@@ -162,7 +229,11 @@ public class NewsListFragment extends SherlockListFragment {
 			String jsonString = streamToString(inputStream);
 
 			JSONObject jsonRoot = new JSONObject(jsonString);
+
 			JSONObject jsonData = jsonRoot.getJSONObject("data");
+
+			String after = jsonData.getString("after");
+
 			JSONArray jsonChildren = jsonData.getJSONArray("children");
 
 			for (int i = 0; i < jsonChildren.length(); i++) {
@@ -176,8 +247,31 @@ public class NewsListFragment extends SherlockListFragment {
 				news.setAuthor(jsonNews.getString("author"));
 				news.setThumbnail(jsonNews.getString("thumbnail"));
 				news.setUrl(jsonNews.getString("url"));
+				news.setSubreddit(jsonNews.getString("subreddit"));
+				news.setAfter(after);
 
-				resultados.add(news);
+				boolean isNewsValid = true;
+
+				if (!isURLValid(news.getUrl())) {
+					isNewsValid = false;
+					Log.d("MYNEWS", "URL Inv‡lida: url=[" + news.getUrl() + "]");
+				}
+				if (!isURLValid(news.getThumbnail())) {
+					isNewsValid = false;
+					Log.d("MYNEWS",
+							"THUMBNAIL Inv‡lida: thumbnail=["
+									+ news.getThumbnail() + "]");
+				}
+
+				if (isNewsValid) {
+					resultados.add(news);
+
+					if (i == MAX_FETCH_NEWS - 1) {
+						// Para n‹o ficar lendo todos os posts
+						// e demorar demais para apresentar a lista;
+						break;
+					}
+				}
 			}
 
 			return resultados;
@@ -200,7 +294,7 @@ public class NewsListFragment extends SherlockListFragment {
 				setListAdapter(newsAdapter);
 			} else {
 				txtMensagem.setVisibility(View.VISIBLE);
-				txtMensagem.setText("Nenhuma not’cia foi encontrada.");
+				txtMensagem.setText("Nenhuma postagem encontrada.");
 
 			}
 
@@ -217,6 +311,19 @@ public class NewsListFragment extends SherlockListFragment {
 			}
 			return new String(baos.toByteArray());
 		}
+	}
+
+	private boolean isURLValid(String url) {
+		if (url != null && url.trim().length() > 0 && !url.contains(" ")
+				&& url.startsWith("http")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public String getCurrentTopicUrl() {
+		return topic;
 	}
 
 }

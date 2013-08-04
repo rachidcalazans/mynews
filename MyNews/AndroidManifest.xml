@@ -26,8 +26,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="br.com.maxwellfn.mynews.DetailNewsActivity"
-            android:label="@string/title_activity_detail_news" >
+            android:name="br.com.maxwellfn.mynews.SmartphoneNewsListsActivity"
+            android:label="@string/title_activity_smartphone_news_lists" >
         </activity>
     </application>
 
