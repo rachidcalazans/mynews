@@ -1,6 +1,8 @@
 package br.com.maxwellfn.mynews;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,20 +20,16 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 	protected Bitmap doInBackground(String... urls) {
 		String urldisplay = urls[0];
 		Bitmap mIcon11 = null;
+		InputStream in;
 		try {
-
-//			if (urldisplay != null && urldisplay.contains("http://")) {
-
-				// InputStream in = new java.net.URL(urldisplay.replaceAll(" ",
-				// "%20")).openStream();
-				InputStream in = new java.net.URL(urldisplay).openStream();
-				mIcon11 = BitmapFactory.decodeStream(in);
-//			} else {
-			// Log.d("MYNEWS", "urldisplay=" + urldisplay);
-			// }
-		} catch (Exception e) {
+			in = new java.net.URL(urldisplay).openStream();
+			mIcon11 = BitmapFactory.decodeStream(in);
+		} catch (MalformedURLException e) {
+			Log.d("MYNEWS", "URL de Imagem Inv‡lida=[" + urldisplay + "]");
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		return mIcon11;
 	}
 

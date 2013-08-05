@@ -25,6 +25,8 @@ public class MainActivity extends NewsListsFragmentManager implements
 		setTheme(R.style.Theme_Sherlock_Light_DarkActionBar);
 		setContentView(R.layout.activity_main);
 
+		// Configura fragmento de t—picos
+
 		topicListFragment = (TopicListFragment) getSupportFragmentManager()
 				.findFragmentByTag(TAG_FRAGMENT_TOPIC_LIST);
 
@@ -40,19 +42,39 @@ public class MainActivity extends NewsListsFragmentManager implements
 				.add(R.id.topicListFrame, topicListFragment,
 						TAG_FRAGMENT_TOPIC_LIST).commit();
 
+		// Fim de configura fragmento de t—picos
+
 		if (isTablet()) {
+
+			// Configura fragmento de favoritas
+
+			favoriteNewsListFragment = (FavoriteNewsListFragment) getSupportFragmentManager()
+					.findFragmentByTag(TAG_FRAGMENT_FAVORITE_NEWS);
+
+			if (favoriteNewsListFragment == null) {
+				favoriteNewsListFragment = FavoriteNewsListFragment
+						.novaInstancia();
+			}
+
+			favoriteNewsListFragment.setNewsClickListener(this);
+
+			getSupportFragmentManager()
+					.beginTransaction()
+					.add(R.id.newsListsFrame, favoriteNewsListFragment,
+							TAG_FRAGMENT_FAVORITE_NEWS).commit();
+
+			// Fim de configura fragmento de favoritos
 
 			initNewsLists();
 
-			// createNewsLists(currentTopic, this);
-
-			newsListFragment1 = instanceNewsList(currentTopic, this,
+			CurrentNewsListFragmentData firstNewsListFragmentData = new CurrentNewsListFragmentData(
 					newsListFragment1, CLASSIFICATION_POPULARES,
 					TAG_FRAGMENT_NEWS_LIST1);
 
-			// addNewsLists();
+			newsListFragment1 = instanceNewsList(currentTopic, this,
+					firstNewsListFragmentData);
 
-			configTabs();
+			configTabs(true, false, currentTopic);
 
 			recoverInstanceAttr(savedInstanceState, currentTopic, currentNews);
 
@@ -83,7 +105,7 @@ public class MainActivity extends NewsListsFragmentManager implements
 	@Override
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		if (isTablet()) {
-			changeTab(tab, ft, currentTopic, this);
+			changeTab(ft, currentTopic, this, isTablet());
 		}
 	}
 
@@ -105,13 +127,13 @@ public class MainActivity extends NewsListsFragmentManager implements
 		this.currentTopic = topic;
 
 		if (isTablet()) {
-
+			setActionBarLogoAndSubTitle(topic);
 			replaceNewsLists(currentTopic);
 
 		} else {
 
 			Intent i = new Intent(this, SmartphoneNewsListsActivity.class);
-			i.putExtra("topic", currentTopic);
+			i.putExtra(SAVED_INSTANCE_CURRENT_TOPIC, currentTopic);
 			startActivityForResult(i, 0);
 		}
 

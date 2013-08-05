@@ -1,17 +1,27 @@
 package br.com.maxwellfn.mynews;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import br.com.maxwellfn.mynews.NewsListFragment.OnNewsClickListener;
 import android.support.v4.app.FragmentTransaction;
+import br.com.maxwellfn.mynews.NewsListFragment.OnNewsClickListener;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.ActionBar.TabListener;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.app.SherlockListFragment;
 
 public class NewsListsFragmentManager extends SherlockFragmentActivity
 		implements TabListener {
 
+	private static final int NUM_TABS = 6;
 	public static final String SAVED_INSTANCE_ABA_SELECIONADA = "abaSelecionada";
 	public static final String SAVED_INSTANCE_CURRENT_TOPIC = "current_topic";
 	public static final String SAVED_INSTANCE_CURRENT_NEWS = "current_news";
@@ -27,12 +37,14 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 	public static final String TAG_FRAGMENT_NEWS_LIST3 = "newsListFragment3";
 	public static final String TAG_FRAGMENT_NEWS_LIST4 = "newsListFragment4";
 	public static final String TAG_FRAGMENT_NEWS_LIST5 = "newsListFragment5";
+	public static final String TAG_FRAGMENT_FAVORITE_NEWS = "favoriteNewsListFragment";
 
 	public NewsListFragment newsListFragment1;
 	public NewsListFragment newsListFragment2;
 	public NewsListFragment newsListFragment3;
 	public NewsListFragment newsListFragment4;
 	public NewsListFragment newsListFragment5;
+	public FavoriteNewsListFragment favoriteNewsListFragment;
 
 	ActionBar actionBar;
 
@@ -47,24 +59,48 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 				.findFragmentByTag(TAG_FRAGMENT_NEWS_LIST4);
 		newsListFragment5 = (NewsListFragment) getSupportFragmentManager()
 				.findFragmentByTag(TAG_FRAGMENT_NEWS_LIST5);
+
 	}
 
 	public NewsListFragment instanceNewsList(Topic currentTopic,
 			OnNewsClickListener newsClickListener,
-			NewsListFragment newsListFragment, String classification,
-			String fragmentTag) {
+			CurrentNewsListFragmentData currentNewsListFragmentData) {
 
-		if (newsListFragment == null) {
+		NewsListFragment newsListFragment = (NewsListFragment) currentNewsListFragmentData
+				.getNewsListFragment();
+
+		if (currentNewsListFragmentData.getNewsListFragment() == null) {
 
 			newsListFragment = NewsListFragment.novaInstancia(
-					currentTopic.getUrl(), classification, "");
+					currentTopic.getUrl(),
+					currentNewsListFragmentData.getClassification(), "");
 
 		}
 
-		addNewsList(newsListFragment, fragmentTag);
+		addNewsList(newsListFragment, currentNewsListFragmentData.getTag());
 
 		newsListFragment.setNewsClickListener(newsClickListener);
 		return newsListFragment;
+	}
+
+	public FavoriteNewsListFragment instanceFavoriteNewsList(
+			OnNewsClickListener newsClickListener,
+			CurrentNewsListFragmentData currentNewsListFragmentData) {
+
+		FavoriteNewsListFragment favoriteNewsListFragment = (FavoriteNewsListFragment) currentNewsListFragmentData
+				.getNewsListFragment();
+
+		if (currentNewsListFragmentData.getNewsListFragment() == null) {
+
+			favoriteNewsListFragment = FavoriteNewsListFragment.novaInstancia();
+
+		}
+
+		addNewsList(favoriteNewsListFragment,
+				currentNewsListFragmentData.getTag());
+
+		favoriteNewsListFragment.setNewsClickListener(newsClickListener);
+		return favoriteNewsListFragment;
 	}
 
 	public void replaceNewsLists(Topic topic) {
@@ -81,8 +117,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 			getSupportFragmentManager()
 					.beginTransaction()
 					.replace(R.id.newsListsFrame, newsListFragment1,
-							TAG_FRAGMENT_NEWS_LIST1).addToBackStack(null)
-					.commit();
+							TAG_FRAGMENT_NEWS_LIST1).commit();
 
 			break;
 		case 1:
@@ -95,8 +130,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 			getSupportFragmentManager()
 					.beginTransaction()
 					.replace(R.id.newsListsFrame, newsListFragment2,
-							TAG_FRAGMENT_NEWS_LIST2).addToBackStack(null)
-					.commit();
+							TAG_FRAGMENT_NEWS_LIST2).commit();
 			break;
 		case 2:
 
@@ -108,8 +142,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 			getSupportFragmentManager()
 					.beginTransaction()
 					.replace(R.id.newsListsFrame, newsListFragment3,
-							TAG_FRAGMENT_NEWS_LIST3).addToBackStack(null)
-					.commit();
+							TAG_FRAGMENT_NEWS_LIST3).commit();
 			break;
 		case 3:
 
@@ -121,8 +154,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 			getSupportFragmentManager()
 					.beginTransaction()
 					.replace(R.id.newsListsFrame, newsListFragment4,
-							TAG_FRAGMENT_NEWS_LIST4).addToBackStack(null)
-					.commit();
+							TAG_FRAGMENT_NEWS_LIST4).commit();
 			break;
 		case 4:
 
@@ -134,8 +166,18 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 			getSupportFragmentManager()
 					.beginTransaction()
 					.replace(R.id.newsListsFrame, newsListFragment5,
-							TAG_FRAGMENT_NEWS_LIST5).addToBackStack(null)
-					.commit();
+							TAG_FRAGMENT_NEWS_LIST5).commit();
+			break;
+		case 5:
+
+			getSupportFragmentManager().beginTransaction()
+					.remove(favoriteNewsListFragment).commit();
+
+			favoriteNewsListFragment = FavoriteNewsListFragment.novaInstancia();
+			getSupportFragmentManager()
+					.beginTransaction()
+					.replace(R.id.newsListsFrame, favoriteNewsListFragment,
+							TAG_FRAGMENT_FAVORITE_NEWS).commit();
 			break;
 		}
 
@@ -154,36 +196,42 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 		}
 	}
 
-	public CurrentNewsListFragmentData getCurrentNewsListFragment(Tab tab) {
+	public CurrentNewsListFragmentData getCurrentNewsListFragment() {
 
-		CurrentNewsListFragmentData currentNewsListFragment = null;
+		CurrentNewsListFragmentData currentNewsListFragmentData = null;
+		int position = actionBar.getSelectedTab().getPosition();
 
-		switch (tab.getPosition()) {
+		switch (position) {
 		case 0:
-			currentNewsListFragment = new CurrentNewsListFragmentData(
+			currentNewsListFragmentData = new CurrentNewsListFragmentData(
 					newsListFragment1, CLASSIFICATION_POPULARES,
 					TAG_FRAGMENT_NEWS_LIST1);
 
 			break;
 		case 1:
-			currentNewsListFragment = new CurrentNewsListFragmentData(
+			currentNewsListFragmentData = new CurrentNewsListFragmentData(
 					newsListFragment2, CLASSIFICATION_NOVOS,
 					TAG_FRAGMENT_NEWS_LIST2);
 			break;
 		case 2:
-			currentNewsListFragment = new CurrentNewsListFragmentData(
+			currentNewsListFragmentData = new CurrentNewsListFragmentData(
 					newsListFragment3, CLASSIFICATION_SUBINDO,
 					TAG_FRAGMENT_NEWS_LIST3);
 			break;
 		case 3:
-			currentNewsListFragment = new CurrentNewsListFragmentData(
+			currentNewsListFragmentData = new CurrentNewsListFragmentData(
 					newsListFragment4, CLASSIFICATION_CONTROVERSOS,
 					TAG_FRAGMENT_NEWS_LIST4);
 			break;
 		case 4:
-			currentNewsListFragment = new CurrentNewsListFragmentData(
+			currentNewsListFragmentData = new CurrentNewsListFragmentData(
 					newsListFragment5, CLASSIFICATION_NOTOPO,
 					TAG_FRAGMENT_NEWS_LIST5);
+			break;
+		case 5:
+			// Favoritas!
+			currentNewsListFragmentData = new CurrentNewsListFragmentData(
+					favoriteNewsListFragment, null, TAG_FRAGMENT_FAVORITE_NEWS);
 			break;
 		default:
 			break;
@@ -191,30 +239,31 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 
 		}
 
-		return currentNewsListFragment;
+		return currentNewsListFragmentData;
 	}
 
 	class CurrentNewsListFragmentData {
 
-		private NewsListFragment newsListFragment;
+		private SherlockListFragment newsListFragment;
 
 		private String classification;
 
 		private String tag;
 
-		public CurrentNewsListFragmentData(NewsListFragment newsListFragment,
-				String classification, String tag) {
+		public CurrentNewsListFragmentData(
+				SherlockListFragment newsListFragment, String classification,
+				String tag) {
 			super();
 			this.newsListFragment = newsListFragment;
 			this.classification = classification;
 			this.tag = tag;
 		}
 
-		public NewsListFragment getNewsListFragment() {
+		public SherlockListFragment getNewsListFragment() {
 			return newsListFragment;
 		}
 
-		public void setNewsListFragment(NewsListFragment newsListFragment) {
+		public void setNewsListFragment(SherlockListFragment newsListFragment) {
 			this.newsListFragment = newsListFragment;
 		}
 
@@ -236,34 +285,39 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 
 	}
 
-	public void updateCurrentNewsListFragment(Tab tab, FragmentTransaction ft,
-			NewsListFragment newsListFragmentUpdated) {
+	public void updateCurrentNewsListFragment(FragmentTransaction ft,
+			SherlockListFragment newsListFragmentUpdated) {
 
-		switch (tab.getPosition()) {
+		int position = actionBar.getSelectedTab().getPosition();
+
+		switch (position) {
 		case 0:
 
-			newsListFragment1 = newsListFragmentUpdated;
+			newsListFragment1 = (NewsListFragment) newsListFragmentUpdated;
 			ft.show(newsListFragment1);
 			break;
 		case 1:
 
-			newsListFragment2 = newsListFragmentUpdated;
+			newsListFragment2 = (NewsListFragment) newsListFragmentUpdated;
 			ft.show(newsListFragment2);
 			break;
 		case 2:
 
-			newsListFragment3 = newsListFragmentUpdated;
+			newsListFragment3 = (NewsListFragment) newsListFragmentUpdated;
 			ft.show(newsListFragment3);
 			break;
 		case 3:
 
-			newsListFragment4 = newsListFragmentUpdated;
+			newsListFragment4 = (NewsListFragment) newsListFragmentUpdated;
 			ft.show(newsListFragment4);
 			break;
 		case 4:
-
-			newsListFragment5 = newsListFragmentUpdated;
+			newsListFragment5 = (NewsListFragment) newsListFragmentUpdated;
 			ft.show(newsListFragment5);
+			break;
+		case 5:
+			favoriteNewsListFragment = (FavoriteNewsListFragment) newsListFragmentUpdated;
+			ft.show(favoriteNewsListFragment);
 			break;
 		default:
 			break;
@@ -291,61 +345,62 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 				&& newsListFragment5 != newsListFragmentUpdated) {
 			ft.hide(newsListFragment5);
 		}
+		if (favoriteNewsListFragment != null
+				&& favoriteNewsListFragment != newsListFragmentUpdated) {
+			ft.hide(favoriteNewsListFragment);
+		}
 
 	}
 
-	public void changeTab(Tab tab, FragmentTransaction ft, Topic currentTopic,
-			OnNewsClickListener newsClickListener) {
+	public void changeTab(FragmentTransaction ft, Topic currentTopic,
+			OnNewsClickListener newsClickListener, boolean isTablet) {
 
-		CurrentNewsListFragmentData currentNewsListFragmentData = getCurrentNewsListFragment(tab);
+		int position = actionBar.getSelectedTab().getPosition();
 
-		if (hasChangedCurrentTopic(
-				currentNewsListFragmentData.getNewsListFragment(), currentTopic)) {
+		CurrentNewsListFragmentData currentNewsListFragmentData = getCurrentNewsListFragment();
+
+		setTabText(isTablet, true);
+
+		if (currentNewsListFragmentData.getNewsListFragment() instanceof NewsListFragment
+				&& hasChangedCurrentTopic(
+						(NewsListFragment) currentNewsListFragmentData
+								.getNewsListFragment(),
+						currentTopic)) {
 
 			replaceNewsLists(currentTopic);
 
 		} else {
 
-			switch (tab.getPosition()) {
+			switch (position) {
 			case 0:
 				newsListFragment1 = instanceNewsList(currentTopic,
-						newsClickListener,
-						currentNewsListFragmentData.getNewsListFragment(),
-						currentNewsListFragmentData.getClassification(),
-						currentNewsListFragmentData.getTag());
-				updateCurrentNewsListFragment(tab, ft, newsListFragment1);
+						newsClickListener, currentNewsListFragmentData);
+				updateCurrentNewsListFragment(ft, newsListFragment1);
 				break;
 			case 1:
 				newsListFragment2 = instanceNewsList(currentTopic,
-						newsClickListener,
-						currentNewsListFragmentData.getNewsListFragment(),
-						currentNewsListFragmentData.getClassification(),
-						currentNewsListFragmentData.getTag());
-				updateCurrentNewsListFragment(tab, ft, newsListFragment2);
+						newsClickListener, currentNewsListFragmentData);
+				updateCurrentNewsListFragment(ft, newsListFragment2);
 				break;
 			case 2:
 				newsListFragment3 = instanceNewsList(currentTopic,
-						newsClickListener,
-						currentNewsListFragmentData.getNewsListFragment(),
-						currentNewsListFragmentData.getClassification(),
-						currentNewsListFragmentData.getTag());
-				updateCurrentNewsListFragment(tab, ft, newsListFragment3);
+						newsClickListener, currentNewsListFragmentData);
+				updateCurrentNewsListFragment(ft, newsListFragment3);
 				break;
 			case 3:
 				newsListFragment4 = instanceNewsList(currentTopic,
-						newsClickListener,
-						currentNewsListFragmentData.getNewsListFragment(),
-						currentNewsListFragmentData.getClassification(),
-						currentNewsListFragmentData.getTag());
-				updateCurrentNewsListFragment(tab, ft, newsListFragment4);
+						newsClickListener, currentNewsListFragmentData);
+				updateCurrentNewsListFragment(ft, newsListFragment4);
 				break;
 			case 4:
 				newsListFragment5 = instanceNewsList(currentTopic,
-						newsClickListener,
-						currentNewsListFragmentData.getNewsListFragment(),
-						currentNewsListFragmentData.getClassification(),
-						currentNewsListFragmentData.getTag());
-				updateCurrentNewsListFragment(tab, ft, newsListFragment5);
+						newsClickListener, currentNewsListFragmentData);
+				updateCurrentNewsListFragment(ft, newsListFragment5);
+				break;
+			case 5:
+				favoriteNewsListFragment = instanceFavoriteNewsList(
+						newsClickListener, currentNewsListFragmentData);
+				updateCurrentNewsListFragment(ft, favoriteNewsListFragment);
 				break;
 			default:
 				break;
@@ -354,126 +409,9 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 			}
 		}
 
-		//
-		// if (tab.getPosition() == 0) {
-		//
-		// if (hasChangedCurrentTopic(newsListFragment1, currentTopic)) {
-		//
-		// replaceNewsLists(currentTopic);
-		//
-		// } else {
-		//
-		// newsListFragment1 = instanceNewsList(currentTopic,
-		// newsClickListener, newsListFragment1,
-		// CLASSIFICATION_POPULARES, TAG_FRAGMENT_NEWS_LIST1);
-		// }
-		//
-		// ft.show(newsListFragment1);
-		//
-		// if (newsListFragment2 != null) {
-		// ft.hide(newsListFragment2);
-		// }
-		//
-		// if (newsListFragment3 != null) {
-		// ft.hide(newsListFragment3);
-		// }
-		// if (newsListFragment4 != null) {
-		// ft.hide(newsListFragment4);
-		// }
-		// if (newsListFragment5 != null) {
-		// ft.hide(newsListFragment5);
-		// }
-		//
-		// } else if (tab.getPosition() == 1) {
-		//
-		// newsListFragment2 = instanceNewsList(currentTopic,
-		// newsClickListener, newsListFragment2, CLASSIFICATION_NOVOS,
-		// TAG_FRAGMENT_NEWS_LIST2);
-		//
-		// ft.show(newsListFragment2);
-		//
-		// if (newsListFragment1 != null) {
-		// ft.hide(newsListFragment1);
-		// }
-		//
-		// if (newsListFragment3 != null) {
-		// ft.hide(newsListFragment3);
-		// }
-		// if (newsListFragment4 != null) {
-		// ft.hide(newsListFragment4);
-		// }
-		// if (newsListFragment5 != null) {
-		// ft.hide(newsListFragment5);
-		// }
-		//
-		// } else if (tab.getPosition() == 2) {
-		//
-		// newsListFragment3 = instanceNewsList(currentTopic,
-		// newsClickListener, newsListFragment3,
-		// CLASSIFICATION_SUBINDO, TAG_FRAGMENT_NEWS_LIST3);
-		//
-		// ft.show(newsListFragment3);
-		//
-		// if (newsListFragment1 != null) {
-		// ft.hide(newsListFragment1);
-		// }
-		//
-		// if (newsListFragment2 != null) {
-		// ft.hide(newsListFragment2);
-		// }
-		// if (newsListFragment4 != null) {
-		// ft.hide(newsListFragment4);
-		// }
-		// if (newsListFragment5 != null) {
-		// ft.hide(newsListFragment5);
-		// }
-		//
-		// } else if (tab.getPosition() == 3) {
-		//
-		// newsListFragment4 = instanceNewsList(currentTopic,
-		// newsClickListener, newsListFragment4,
-		// CLASSIFICATION_CONTROVERSOS, TAG_FRAGMENT_NEWS_LIST4);
-		//
-		// ft.show(newsListFragment4);
-		// if (newsListFragment1 != null) {
-		// ft.hide(newsListFragment1);
-		// }
-		//
-		// if (newsListFragment2 != null) {
-		// ft.hide(newsListFragment2);
-		// }
-		// if (newsListFragment3 != null) {
-		// ft.hide(newsListFragment3);
-		// }
-		// if (newsListFragment5 != null) {
-		// ft.hide(newsListFragment5);
-		// }
-		//
-		// } else {
-		//
-		// newsListFragment5 = instanceNewsList(currentTopic,
-		// newsClickListener, newsListFragment5,
-		// CLASSIFICATION_NOTOPO, TAG_FRAGMENT_NEWS_LIST5);
-		//
-		// ft.show(newsListFragment5);
-		//
-		// if (newsListFragment1 != null) {
-		// ft.hide(newsListFragment1);
-		// }
-		//
-		// if (newsListFragment2 != null) {
-		// ft.hide(newsListFragment2);
-		// }
-		// if (newsListFragment3 != null) {
-		// ft.hide(newsListFragment3);
-		// }
-		// if (newsListFragment4 != null) {
-		// ft.hide(newsListFragment4);
-		// }
-		// }
 	}
 
-	public void addNewsList(NewsListFragment newsListFragment,
+	public void addNewsList(SherlockListFragment newsListFragment,
 			String fragmentTag) {
 
 		getSupportFragmentManager().beginTransaction()
@@ -497,23 +435,114 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 
 	}
 
-	public void configTabs() {
-		actionBar = getSupportActionBar();
+	public static final String TAB_NOME_GRANDE_POPULARES = "populares";
+	public static final String TAB_NOME_GRANDE_NOVOS = "novos";
+	public static final String TAB_NOME_GRANDE_SUBINDO = "subindo";
+	public static final String TAB_NOME_GRANDE_CONTROVERSOS = "controversos";
+	public static final String TAB_NOME_GRANDE_NOTOPO = "no topo";
+	public static final String TAB_NOME_GRANDE_FAVORITAS = "favoritas";
 
+	public static final String TAB_NOME_ABREV_POPULARES = "pop...";
+	public static final String TAB_NOME_ABREV_NOVOS = "nov...";
+	public static final String TAB_NOME_ABREV_SUBINDO = "sub...";
+	public static final String TAB_NOME_ABREV_CONTROVERSOS = "con...";
+	public static final String TAB_NOME_ABREV_NOTOPO = "top...";
+	public static final String TAB_NOME_ABREV_FAVORITAS = "fav...";
+
+	public void setTabText(boolean isTablet, boolean forceBigName) {
+
+		setTabText(isTablet, forceBigName, null);
+
+	}
+
+	public void setTabText(boolean isTablet, boolean forceBigName,
+			Integer tabPosition) {
+
+		String tabBigName = "";
+		String tabShortName = "";
+		int position;
+
+		if (tabPosition == null) {
+			position = (actionBar.getSelectedTab() != null ? actionBar
+					.getSelectedTab().getPosition() : 0);
+		} else {
+			position = tabPosition.intValue();
+		}
+
+		switch (position) {
+		case 0:
+			tabBigName = TAB_NOME_GRANDE_POPULARES;
+			tabShortName = TAB_NOME_ABREV_POPULARES;
+			break;
+		case 1:
+			tabBigName = TAB_NOME_GRANDE_NOVOS;
+			tabShortName = TAB_NOME_ABREV_NOVOS;
+			break;
+		case 2:
+			tabBigName = TAB_NOME_GRANDE_SUBINDO;
+			tabShortName = TAB_NOME_ABREV_SUBINDO;
+			break;
+		case 3:
+			tabBigName = TAB_NOME_GRANDE_CONTROVERSOS;
+			tabShortName = TAB_NOME_ABREV_CONTROVERSOS;
+			break;
+		case 4:
+			tabBigName = TAB_NOME_GRANDE_NOTOPO;
+			tabShortName = TAB_NOME_ABREV_NOTOPO;
+			break;
+		case 5:
+			tabBigName = TAB_NOME_GRANDE_FAVORITAS;
+			tabShortName = TAB_NOME_ABREV_FAVORITAS;
+			break;
+		default:
+			break;
+
+		}
+
+		if (isTablet || forceBigName) {
+
+			// Configura nome abreviado para todas as tabs
+			// quando n‹o for tablet.
+			if (!isTablet && forceBigName
+					&& actionBar.getTabCount() >= NUM_TABS) {
+
+				for (int i = 0; i < actionBar.getTabCount(); i++) {
+					setTabText(false, false, i);
+				}
+
+			}
+
+			actionBar.getTabAt(position).setText(tabBigName);
+
+		} else {
+
+			actionBar.getTabAt(position).setText(tabShortName);
+
+		}
+
+	}
+
+	public void configTabs(boolean isTablet, boolean forceBigName,
+			Topic currentTopic) {
+		actionBar = getSupportActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		Tab aba1 = actionBar.newTab().setText("populares").setTabListener(this);
-		Tab aba2 = actionBar.newTab().setText("novos").setTabListener(this);
-		Tab aba3 = actionBar.newTab().setText("subindo").setTabListener(this);
-		Tab aba4 = actionBar.newTab().setText("controversos")
-				.setTabListener(this);
-		Tab aba5 = actionBar.newTab().setText("no topo").setTabListener(this);
+		setActionBarLogoAndSubTitle(currentTopic);
 
-		actionBar.addTab(aba1);
-		actionBar.addTab(aba2);
-		actionBar.addTab(aba3);
-		actionBar.addTab(aba4);
-		actionBar.addTab(aba5);
+		Tab tabs[] = new Tab[NUM_TABS];
+
+		for (int i = 0; i < tabs.length; i++) {
+			tabs[i] = actionBar.newTab().setTabListener(this);
+			actionBar.addTab(tabs[i]);
+			setTabText(isTablet, (i == 0 ? true : false), i);
+
+			// Configura‹o especial para a tab favoritas.
+			if (i == tabs.length - 1) {
+				actionBar.getTabAt(i).setIcon(
+						android.R.drawable.btn_star_big_on);
+			}
+		}
+
 	}
 
 	public void saveInstanceAttr(Bundle outState, Topic currentTopic,
@@ -536,4 +565,40 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 		}
 	}
 
+	public static boolean isURLValid(String url) {
+		if (url != null && url.trim().length() > 0 && !url.contains(" ")
+				&& url.startsWith("http")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public void setActionBarLogoAndSubTitle(Topic topic) {
+
+		actionBar.setSubtitle(topic.getDisplayName());
+
+		InputStream in = null;
+		Drawable d = null;
+		try {
+			if (isURLValid(topic.getHeaderImg())) {
+				in = new java.net.URL(topic.getHeaderImg()).openStream();
+				Bitmap bitmapTopicLogo = BitmapFactory.decodeStream(in);
+				d = new BitmapDrawable(getResources(), bitmapTopicLogo);
+			}
+
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		if (d != null) {
+			actionBar.setDisplayUseLogoEnabled(true);
+			actionBar.setLogo(d);
+		} else {
+			actionBar.setDisplayUseLogoEnabled(false);
+
+		}
+	}
 }

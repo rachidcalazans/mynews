@@ -19,23 +19,42 @@ public class SmartphoneNewsListsActivity extends NewsListsFragmentManager
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		currentTopic = (Topic) getIntent().getSerializableExtra("topic");
+		currentTopic = (Topic) getIntent().getSerializableExtra(
+				SAVED_INSTANCE_CURRENT_TOPIC);
 
 		setTheme(R.style.Theme_Sherlock_Light_DarkActionBar);
 		setContentView(R.layout.activity_lists_news_smartphone);
 
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+		// Configura fragmento de favoritas
+
+		favoriteNewsListFragment = (FavoriteNewsListFragment) getSupportFragmentManager()
+				.findFragmentByTag(TAG_FRAGMENT_FAVORITE_NEWS);
+
+		if (favoriteNewsListFragment == null) {
+			favoriteNewsListFragment = FavoriteNewsListFragment.novaInstancia();
+		}
+
+		favoriteNewsListFragment.setNewsClickListener(this);
+
+		getSupportFragmentManager()
+				.beginTransaction()
+				.add(R.id.newsListsFrame, favoriteNewsListFragment,
+						TAG_FRAGMENT_FAVORITE_NEWS).commit();
+
+		// Fim de configura fragmento de favoritos
+
 		initNewsLists();
 
-		// createNewsLists(currentTopic, this);
+		CurrentNewsListFragmentData firstNewsListFragmentData = new CurrentNewsListFragmentData(
+				newsListFragment1, CLASSIFICATION_POPULARES,
+				TAG_FRAGMENT_NEWS_LIST1);
 
-		instanceNewsList(currentTopic, this, newsListFragment1,
-				CLASSIFICATION_POPULARES, TAG_FRAGMENT_NEWS_LIST1);
+		newsListFragment1 = instanceNewsList(currentTopic, this,
+				firstNewsListFragmentData);
 
-		// addNewsLists();
-
-		configTabs();
+		configTabs(false, false, currentTopic);
 
 		recoverInstanceAttr(savedInstanceState, currentTopic, currentNews);
 
@@ -64,7 +83,7 @@ public class SmartphoneNewsListsActivity extends NewsListsFragmentManager
 
 	@Override
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
-		changeTab(tab, ft, currentTopic, this);
+		changeTab(ft, currentTopic, this, false);
 
 	}
 

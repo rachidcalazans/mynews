@@ -157,6 +157,14 @@ public class News implements Serializable {
 	public void setOver18(String over18) {
 		this.over18 = over18;
 	}
+	
+	
+
+	public News(String title, String subreddit) {
+		super();
+		this.title = title;
+		this.subreddit = subreddit;
+	}
 
 	public News() {
 		super();

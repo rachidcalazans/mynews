@@ -32,7 +32,6 @@ import com.actionbarsherlock.app.SherlockListFragment;
 public class TopicListFragment extends SherlockListFragment {
 
 	public static final String AFTER = "after";
-	private static final int MAX_FETCH_TOPICS = 10;
 
 	TopicSearchTask task;
 	ProgressBar progress;
@@ -160,10 +159,22 @@ public class TopicListFragment extends SherlockListFragment {
 		private List<Topic> getTopicList(InputStream inputStream)
 				throws IOException, JSONException {
 			List<Topic> resultados = new ArrayList<Topic>();
+			long inicio, fim;
 
+			inicio = System.currentTimeMillis();
+			// Conecta com o servidor, abre o stream e converte pra stream
 			String jsonString = streamToString(inputStream);
+			fim = System.currentTimeMillis();
+			Log.d("MYNEWS", "(p1):" + (fim - inicio));
 
+			inicio = System.currentTimeMillis();
+			// Conecta com o servidor, abre o stream e converte pra stream
 			JSONObject jsonRoot = new JSONObject(jsonString);
+			fim = System.currentTimeMillis();
+			Log.d("MYNEWS", "(p2):" + (fim - inicio));
+
+			inicio = System.currentTimeMillis();
+
 			JSONObject jsonData = jsonRoot.getJSONObject("data");
 			String after = jsonData.getString("after");
 			JSONArray jsonChildren = jsonData.getJSONArray("children");
@@ -178,7 +189,8 @@ public class TopicListFragment extends SherlockListFragment {
 			headerListTopic
 					.setPublicDescription("Busca de todas as postagens sem filtro por t—picos.");
 			headerListTopic.setUrl("");
-			headerListTopic.setHeaderImg(null);
+			headerListTopic
+					.setHeaderImg("http://www.reddit.com/static/blog_snoo.png");
 			headerListTopic.setSubscribers(0);
 			headerListTopic.setAfter(after);
 
@@ -199,14 +211,23 @@ public class TopicListFragment extends SherlockListFragment {
 				topic.setSubscribers(jsonNews.getInt("subscribers"));
 				topic.setAfter(after);
 
-				resultados.add(topic);
+				boolean isTopicValid = true;
 
-				if (i == MAX_FETCH_TOPICS - 1) {
-					// Para n‹o ficar lendo todos os posts
-					// e demorar demais para apresentar a lista;
-					break;
+				if (!NewsListsFragmentManager.isURLValid(topic.getHeaderImg())) {
+					isTopicValid = false;
+					Log.d("MYNEWS", "URL Topic Image Header Inv‡lida: url=["
+							+ topic.getUrl() + "]");
+				}
+
+				if (isTopicValid) {
+
+					resultados.add(topic);
+
 				}
 			}
+
+			fim = System.currentTimeMillis();
+			Log.d("MYNEWS", "(p3):" + (fim - inicio));
 
 			return resultados;
 		}

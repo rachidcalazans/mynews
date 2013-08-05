@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class TopicAdapter extends ArrayAdapter<Topic> {
@@ -23,8 +24,8 @@ public class TopicAdapter extends ArrayAdapter<Topic> {
 			convertView = LayoutInflater.from(getContext()).inflate(
 					R.layout.item_list_topic, null);
 			holder = new ViewHolder();
-//			holder.imgHeaderImg = (ImageView) convertView
-//					.findViewById(R.id.imgTopicHeaderImage);
+			holder.imgHeaderImg = (ImageView) convertView
+					.findViewById(R.id.imgTopicHeaderImage);
 
 			holder.txtDisplayName = (TextView) convertView
 					.findViewById(R.id.txtTopicDisplayName);
@@ -35,8 +36,8 @@ public class TopicAdapter extends ArrayAdapter<Topic> {
 			holder = (ViewHolder) convertView.getTag();
 		}
 
-//		new DownloadImageTask(holder.imgHeaderImg)
-//				.execute(topic.getHeaderImg());
+		new DownloadImageTask(holder.imgHeaderImg)
+				.execute(topic.getHeaderImg());
 
 		holder.txtDisplayName.setText(topic.getDisplayName());
 		holder.txtPublicDescription.setText(topic.getPublicDescription());
@@ -45,7 +46,7 @@ public class TopicAdapter extends ArrayAdapter<Topic> {
 	}
 
 	private static class ViewHolder {
-//		ImageView imgHeaderImg;
+		ImageView imgHeaderImg;
 		TextView txtDisplayName;
 		TextView txtPublicDescription;
 	}

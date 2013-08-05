@@ -7,10 +7,9 @@
     tools:context=".SmartphoneNewsListsActivity" >
 
     <FrameLayout
-        android:id="@+id/smartphoneNewsListsFrame"
+        android:id="@+id/newsListsFrame"
         android:layout_width="wrap_content"
-        android:layout_height="0dip"
-        android:layout_weight="2" >
+        android:layout_height="wrap_content" >
     </FrameLayout>
 
 </LinearLayout>

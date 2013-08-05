@@ -35,8 +35,6 @@ public class NewsListFragment extends SherlockListFragment {
 	public static final String TOPIC = "topic";
 	public static final String AFTER = "after";
 
-	private static final int MAX_FETCH_NEWS = 10;
-
 	NewsSearchTask task;
 	ProgressBar progress;
 	TextView txtMensagem;
@@ -252,11 +250,11 @@ public class NewsListFragment extends SherlockListFragment {
 
 				boolean isNewsValid = true;
 
-				if (!isURLValid(news.getUrl())) {
+				if (!NewsListsFragmentManager.isURLValid(news.getUrl())) {
 					isNewsValid = false;
 					Log.d("MYNEWS", "URL Inv‡lida: url=[" + news.getUrl() + "]");
 				}
-				if (!isURLValid(news.getThumbnail())) {
+				if (!NewsListsFragmentManager.isURLValid(news.getThumbnail())) {
 					isNewsValid = false;
 					Log.d("MYNEWS",
 							"THUMBNAIL Inv‡lida: thumbnail=["
@@ -266,11 +264,6 @@ public class NewsListFragment extends SherlockListFragment {
 				if (isNewsValid) {
 					resultados.add(news);
 
-					if (i == MAX_FETCH_NEWS - 1) {
-						// Para n‹o ficar lendo todos os posts
-						// e demorar demais para apresentar a lista;
-						break;
-					}
 				}
 			}
 
@@ -310,15 +303,6 @@ public class NewsListFragment extends SherlockListFragment {
 				baos.write(bytes, 0, lidos);
 			}
 			return new String(baos.toByteArray());
-		}
-	}
-
-	private boolean isURLValid(String url) {
-		if (url != null && url.trim().length() > 0 && !url.contains(" ")
-				&& url.startsWith("http")) {
-			return true;
-		} else {
-			return false;
 		}
 	}
 
