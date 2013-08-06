@@ -4,6 +4,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import br.com.maxwellfn.mynews.NewsListFragment.OnNewsClickListener;
 import br.com.maxwellfn.mynews.TopicListFragment.OnTopicClickListener;
 
@@ -11,6 +15,9 @@ import com.actionbarsherlock.app.ActionBar.Tab;
 
 public class MainActivity extends NewsListsFragmentManager implements
 		OnNewsClickListener, OnTopicClickListener {
+
+	// -dns-server 10.0.192.18,10.193.12.40 -http-proxy
+	// CORREIOSNET\80129633:cagada!123Ect2@10.193.112.18:80
 
 	public static final String TAG_FRAGMENT_TOPIC_LIST = "topicListFragment";
 
@@ -103,6 +110,31 @@ public class MainActivity extends NewsListsFragmentManager implements
 	}
 
 	@Override
+	public boolean onContextItemSelected(android.view.MenuItem item) {
+
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
+
+		News selectedNews = (News) favoriteNewsListFragment.getListView()
+				.getItemAtPosition(info.position);
+
+		if (item.getItemId() == R.id.favoriteItemListContextMenuOptionRemove) {
+
+			DbRepository repo = new DbRepository(this);
+
+			repo.remove(selectedNews, favoriteNewsListFragment);
+
+			favoriteNewsListFragment = instanceFavoriteNewsList(
+					this, getCurrentNewsListFragment());
+			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+			updateCurrentNewsListFragment(ft, favoriteNewsListFragment);
+
+		}
+
+		return super.onContextItemSelected(item);
+	}
+
+	@Override
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		if (isTablet()) {
 			changeTab(ft, currentTopic, this, isTablet());
@@ -137,6 +169,15 @@ public class MainActivity extends NewsListsFragmentManager implements
 			startActivityForResult(i, 0);
 		}
 
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		if (isTablet()) {
+			getMenuInflater().inflate(R.menu.context_menu, menu);
+		}
 	}
 
 }

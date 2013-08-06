@@ -10,6 +10,14 @@ public class News implements Serializable {
 	private static final long serialVersionUID = -1338834187656220329L;
 
 	private String id;
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	private String title;
 
@@ -34,9 +42,31 @@ public class News implements Serializable {
 	private String ups;
 
 	private String over18;
-	
+
 	private String after;
+
+	private int dbId;
 	
+	private boolean isFavorite;
+	
+	
+
+	public boolean isFavorite() {
+		return isFavorite;
+	}
+
+	public void setFavorite(boolean isFavorite) {
+		this.isFavorite = isFavorite;
+	}
+
+	public int getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(int dbId) {
+		this.dbId = dbId;
+	}
+
 	public String getAfter() {
 		return after;
 	}
@@ -50,16 +80,12 @@ public class News implements Serializable {
 		return title;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
 	public String getTitle() {
-		return title;
+		return getField(title);
+	}
+
+	private String getField(String name) {
+		return (name != null ? name.trim() : "");
 	}
 
 	public void setTitle(String title) {
@@ -75,7 +101,8 @@ public class News implements Serializable {
 	}
 
 	public String getThumbnail() {
-		if (thumbnail != null && thumbnail.trim().length() > 0 && !thumbnail.equalsIgnoreCase("default")) {
+		if (thumbnail != null && thumbnail.trim().length() > 0
+				&& !thumbnail.equalsIgnoreCase("default")) {
 			return thumbnail;
 		} else {
 			return "http://www.reddit.com/static/blog_snoo.png";
@@ -87,7 +114,7 @@ public class News implements Serializable {
 	}
 
 	public String getUrl() {
-		return url;
+		return getField(url);
 	}
 
 	public void setUrl(String url) {
@@ -103,7 +130,7 @@ public class News implements Serializable {
 	}
 
 	public String getSubreddit() {
-		return subreddit;
+		return getField(subreddit);
 	}
 
 	public void setSubreddit(String subreddit) {
@@ -157,8 +184,6 @@ public class News implements Serializable {
 	public void setOver18(String over18) {
 		this.over18 = over18;
 	}
-	
-	
 
 	public News(String title, String subreddit) {
 		super();

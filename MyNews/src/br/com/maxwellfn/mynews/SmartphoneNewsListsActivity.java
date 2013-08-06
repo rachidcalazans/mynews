@@ -4,6 +4,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import br.com.maxwellfn.mynews.NewsListFragment.OnNewsClickListener;
 
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -93,5 +97,32 @@ public class SmartphoneNewsListsActivity extends NewsListsFragmentManager
 
 		saveInstanceAttr(outState, currentTopic, currentNews);
 
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		getMenuInflater().inflate(R.menu.context_menu, menu);
+	}
+
+	@Override
+	public boolean onContextItemSelected(android.view.MenuItem item) {
+
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
+
+		News selectedNews = (News) favoriteNewsListFragment.getListView()
+				.getItemAtPosition(info.position);
+
+		if (item.getItemId() == R.id.favoriteItemListContextMenuOptionRemove) {
+			
+			DbRepository repo = new DbRepository(this);
+			
+			repo.remove(selectedNews, favoriteNewsListFragment);
+
+		}
+
+		return super.onContextItemSelected(item);
 	}
 }

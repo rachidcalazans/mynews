@@ -20,9 +20,25 @@
             android:src="@drawable/ic_launcher" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/linearLayoutNewsFavoriteIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/linearLayoutNewsThumbnail"
+        android:layout_alignParentRight="true"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:id="@+id/imgNewsFavoriteIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="News Favorite Icon"
+            android:src="@android:drawable/btn_star_big_off" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/txtNewsTitle"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/linearLayoutNewsThumbnail"
         android:text="News Title"

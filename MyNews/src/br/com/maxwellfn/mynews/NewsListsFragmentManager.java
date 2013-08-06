@@ -87,14 +87,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 			OnNewsClickListener newsClickListener,
 			CurrentNewsListFragmentData currentNewsListFragmentData) {
 
-		FavoriteNewsListFragment favoriteNewsListFragment = (FavoriteNewsListFragment) currentNewsListFragmentData
-				.getNewsListFragment();
-
-		if (currentNewsListFragmentData.getNewsListFragment() == null) {
-
-			favoriteNewsListFragment = FavoriteNewsListFragment.novaInstancia();
-
-		}
+		favoriteNewsListFragment = FavoriteNewsListFragment.novaInstancia();
 
 		addNewsList(favoriteNewsListFragment,
 				currentNewsListFragmentData.getTag());

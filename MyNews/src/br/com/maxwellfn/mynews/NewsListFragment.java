@@ -114,6 +114,7 @@ public class NewsListFragment extends SherlockListFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		registerForContextMenu(getListView());
 
 		setRetainInstance(true);
 

@@ -1,12 +1,14 @@
 package br.com.maxwellfn.mynews;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -54,6 +56,8 @@ public class FavoriteNewsListFragment extends SherlockListFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		registerForContextMenu(getListView());
+		// this.setEmptyText("No favorite news!");
 
 		setRetainInstance(true);
 
@@ -76,7 +80,6 @@ public class FavoriteNewsListFragment extends SherlockListFragment {
 
 	}
 
-
 	public static FavoriteNewsListFragment novaInstancia() {
 		Bundle params = new Bundle();
 
@@ -91,20 +94,7 @@ public class FavoriteNewsListFragment extends SherlockListFragment {
 		@Override
 		protected List<News> doInBackground(String... params) {
 
-			return getFavoriteNewsList();
-		}
-
-		private List<News> getFavoriteNewsList() {
-
-			List<News> resultados = new ArrayList<News>();
-
-			resultados.add(new News("Morreu Dominguinhos.", "worldnews"));
-			resultados
-					.add(new News(
-							"Santa Cruz d‡ vexame e perde por 3 x 0 do Sampaio Correia.",
-							"esportes"));
-
-			return resultados;
+			return getUpdatedFavoriteList(new DbRepository(getActivity()));
 		}
 
 		@Override
@@ -131,6 +121,23 @@ public class FavoriteNewsListFragment extends SherlockListFragment {
 			progress.setVisibility(View.INVISIBLE);
 		}
 
+	}
+
+	public List<News> getUpdatedFavoriteList(DbRepository repo) {
+
+		return repo.getFavoriteNewsList();
+
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		return super.onContextItemSelected(item);
 	}
 
 }
