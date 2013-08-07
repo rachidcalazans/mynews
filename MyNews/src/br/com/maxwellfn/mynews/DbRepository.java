@@ -50,18 +50,14 @@ public class DbRepository {
 								Toast.LENGTH_LONG);
 				toastMsg.setGravity(Gravity.CENTER, 0, 0);
 				toastMsg.show();
-			} 
-//			else {
-//				DbRepository.favoriteNewsListFragment
-//						.getUpdatedFavoriteList(this);
-//			}
+			}
 
 		}
 	}
-	
+
 	public void remove(News news,
 			FavoriteNewsListFragment favoriteNewsListFragment) {
-		remove (news, favoriteNewsListFragment, false);
+		remove(news, favoriteNewsListFragment, false);
 	}
 
 	public void remove(News news,
@@ -92,6 +88,13 @@ public class DbRepository {
 
 									remove(DbRepository.newsToRemove);
 
+									((NewsAdapter) DbRepository.favoriteNewsListFragment
+											.getListAdapter())
+											.remove(DbRepository.newsToRemove);
+									((NewsAdapter) DbRepository.favoriteNewsListFragment
+											.getListAdapter())
+											.notifyDataSetChanged();
+
 								}
 							})
 					.setNegativeButton("N‹o",
@@ -107,8 +110,8 @@ public class DbRepository {
 
 			// show it
 			alertDialog.show();
-		}
 
+		}
 	}
 
 	/**
@@ -221,13 +224,7 @@ public class DbRepository {
 
 				toastMsg.setGravity(Gravity.CENTER, 0, 0);
 				toastMsg.show();
-			} 
-			
-//			else {
-//				DbRepository.favoriteNewsListFragment
-//						.getUpdatedFavoriteList(this);
-//				
-//			}
+			}
 		}
 	}
 

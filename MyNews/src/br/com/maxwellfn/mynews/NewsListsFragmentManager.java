@@ -167,10 +167,12 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 					.remove(favoriteNewsListFragment).commit();
 
 			favoriteNewsListFragment = FavoriteNewsListFragment.novaInstancia();
+
 			getSupportFragmentManager()
 					.beginTransaction()
 					.replace(R.id.newsListsFrame, favoriteNewsListFragment,
 							TAG_FRAGMENT_FAVORITE_NEWS).commit();
+
 			break;
 		}
 

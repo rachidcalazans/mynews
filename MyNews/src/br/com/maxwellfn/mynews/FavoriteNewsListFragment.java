@@ -32,7 +32,9 @@ public class FavoriteNewsListFragment extends SherlockListFragment {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		
 		super.onCreate(savedInstanceState);
+		
 		if (savedInstanceState != null) {
 		}
 	}
@@ -44,7 +46,7 @@ public class FavoriteNewsListFragment extends SherlockListFragment {
 		View layout = inflater.inflate(R.layout.fragment_list_news, null);
 		progress = (ProgressBar) layout.findViewById(R.id.progressBar1);
 		txtMensagem = (TextView) layout.findViewById(R.id.txtMensagem);
-
+		
 		return layout;
 	}
 
@@ -57,8 +59,7 @@ public class FavoriteNewsListFragment extends SherlockListFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		registerForContextMenu(getListView());
-		// this.setEmptyText("No favorite news!");
-
+		
 		setRetainInstance(true);
 
 		if (task == null) {

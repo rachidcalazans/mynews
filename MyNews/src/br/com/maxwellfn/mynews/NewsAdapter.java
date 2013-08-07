@@ -21,6 +21,12 @@ public class NewsAdapter extends ArrayAdapter<News> {
 		this.mainActivity = (NewsListsFragmentManager) context;
 
 	}
+	
+	@Override
+	public void remove(News object) {
+		// TODO Auto-generated method stub
+		super.remove(object);
+	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {

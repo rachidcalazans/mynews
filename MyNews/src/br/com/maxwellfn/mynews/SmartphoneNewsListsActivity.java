@@ -67,9 +67,9 @@ public class SmartphoneNewsListsActivity extends NewsListsFragmentManager
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 
-		// if (item.getItemId() == android.R.id.home) {
-		// finish();
-		// }
+		if (item.getItemId() == android.R.id.home) {
+			finish();
+		}
 
 		return super.onMenuItemSelected(featureId, item);
 	}

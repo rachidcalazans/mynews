@@ -18,6 +18,7 @@ public class MainActivity extends NewsListsFragmentManager implements
 
 	// -dns-server 10.0.192.18,10.193.12.40 -http-proxy
 	// CORREIOSNET\80129633:cagada!123Ect2@10.193.112.18:80
+	//
 
 	public static final String TAG_FRAGMENT_TOPIC_LIST = "topicListFragment";
 
@@ -123,11 +124,6 @@ public class MainActivity extends NewsListsFragmentManager implements
 			DbRepository repo = new DbRepository(this);
 
 			repo.remove(selectedNews, favoriteNewsListFragment);
-
-			favoriteNewsListFragment = instanceFavoriteNewsList(
-					this, getCurrentNewsListFragment());
-			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-			updateCurrentNewsListFragment(ft, favoriteNewsListFragment);
 
 		}
 
