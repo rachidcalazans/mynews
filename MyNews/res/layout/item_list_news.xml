@@ -1,58 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:layout_margin="2dp"
+   
+    android:weightSum="10" >
 
     <LinearLayout
         android:id="@+id/linearLayoutNewsThumbnail"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="0dip"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_weight="1"
+        android:gravity="center"
         android:orientation="horizontal" >
 
         <ImageView
             android:id="@+id/imgNewsThumbnail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="2dp"
             android:contentDescription="News Thumbnail"
             android:src="@drawable/ic_launcher" />
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/linearLayoutNewsContent"
+        android:layout_width="0dip"
+        android:layout_height="wrap_content"
+        android:layout_weight="8"
+        android:orientation="vertical"
+        android:weightSum="10" 
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp">
+
+        <TextView
+            android:id="@+id/txtNewsTitle"
+            android:layout_width="fill_parent"
+            android:layout_height="0dip"
+            android:layout_weight="9"
+            android:gravity="left|top"
+            android:text="News Title"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/txtNewsSubreddit"
+            android:layout_width="fill_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:gravity="left|bottom"
+            android:text="Subreddit"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textSize="12sp"
+            android:textStyle="italic" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/linearLayoutNewsFavoriteIcon"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignBaseline="@id/linearLayoutNewsThumbnail"
-        android:layout_alignParentRight="true"
-        android:gravity="center"
-        android:orientation="horizontal" >
+        android:layout_width="0dip"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center" >
 
         <ImageView
+            android:layout_margin="2dp"
             android:id="@+id/imgNewsFavoriteIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:layout_gravity="center"
             android:contentDescription="News Favorite Icon"
             android:src="@android:drawable/btn_star_big_off" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/txtNewsTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/linearLayoutNewsThumbnail"
-        android:text="News Title"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
-        android:id="@+id/txtNewsSubreddit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/txtNewsTitle"
-        android:layout_toRightOf="@id/linearLayoutNewsThumbnail"
-        android:text="Subreddit"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textSize="12sp"
-        android:textStyle="italic" />
-
-</RelativeLayout>
+</LinearLayout>

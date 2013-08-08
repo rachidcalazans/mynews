@@ -7,14 +7,18 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ListView;
 import br.com.maxwellfn.mynews.NewsListFragment.OnNewsClickListener;
 import br.com.maxwellfn.mynews.TopicListFragment.OnTopicClickListener;
 
 import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.SherlockListFragment;
 
 public class MainActivity extends NewsListsFragmentManager implements
-		OnNewsClickListener, OnTopicClickListener {
+		OnNewsClickListener, OnTopicClickListener, OnScrollListener {
 
 	// -dns-server 10.0.192.18,10.193.12.40 -http-proxy
 	// CORREIOSNET\80129633:cagada!123Ect2@10.193.112.18:80
@@ -23,6 +27,9 @@ public class MainActivity extends NewsListsFragmentManager implements
 	public static final String TAG_FRAGMENT_TOPIC_LIST = "topicListFragment";
 
 	TopicListFragment topicListFragment;
+
+	public static boolean isLoadingMoreNewsItens = false;
+	public static boolean isLoadingMoreTopicItens = false;
 
 	Topic currentTopic = new Topic();
 	News currentNews;
@@ -44,6 +51,7 @@ public class MainActivity extends NewsListsFragmentManager implements
 		}
 
 		topicListFragment.setTopicClickListener(this);
+		topicListFragment.setEndLessScrollListener(this);
 
 		getSupportFragmentManager()
 				.beginTransaction()
@@ -79,8 +87,8 @@ public class MainActivity extends NewsListsFragmentManager implements
 					newsListFragment1, CLASSIFICATION_POPULARES,
 					TAG_FRAGMENT_NEWS_LIST1);
 
-			newsListFragment1 = instanceNewsList(currentTopic, this,
-					firstNewsListFragmentData);
+			newsListFragment1 = instanceNewsList(currentTopic,
+					firstNewsListFragmentData, true);
 
 			configTabs(true, false, currentTopic);
 
@@ -133,7 +141,7 @@ public class MainActivity extends NewsListsFragmentManager implements
 	@Override
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		if (isTablet()) {
-			changeTab(ft, currentTopic, this, isTablet());
+			changeTab(ft, currentTopic, isTablet());
 		}
 	}
 
@@ -155,8 +163,9 @@ public class MainActivity extends NewsListsFragmentManager implements
 		this.currentTopic = topic;
 
 		if (isTablet()) {
-			setActionBarLogoAndSubTitle(topic);
-			replaceNewsLists(currentTopic);
+			new DownloadLogoTopicImageTask().execute(currentTopic
+					.getHeaderImg());
+			replaceNewsLists(currentTopic, true);
 
 		} else {
 
@@ -174,6 +183,64 @@ public class MainActivity extends NewsListsFragmentManager implements
 		if (isTablet()) {
 			getMenuInflater().inflate(R.menu.context_menu, menu);
 		}
+	}
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+
+		if (view == topicListFragment.getListView()) {
+			// O scrolling foi na lista de t—picos
+
+			if (firstVisibleItem + visibleItemCount >= totalItemCount
+					&& totalItemCount != 0) {
+				if (isLoadingMoreTopicItens == false) {
+					isLoadingMoreTopicItens = true;
+					topicListFragment.searchForTopics(
+							((Topic) topicListFragment.getListView()
+									.getItemAtPosition(totalItemCount - 1))
+									.getAfter(), false);
+				}
+			}
+
+		} else {
+
+			// Programa‹o defensiva, pois em smartphones nunca deve chegar
+			// aqui!
+			if (isTablet()) {
+
+				CurrentNewsListFragmentData currentNewsListFragmentData = getCurrentNewsListFragment();
+				SherlockListFragment currentListFragment = currentNewsListFragmentData
+						.getNewsListFragment();
+
+				// O scrolling foi em alguma das listas de News.
+
+				if (currentListFragment instanceof NewsListFragment) {
+
+					NewsListFragment currentNewsListFragment = (NewsListFragment) currentListFragment;
+
+					if (firstVisibleItem + visibleItemCount >= totalItemCount
+							&& totalItemCount != 0) {
+						if (isLoadingMoreNewsItens == false) {
+							isLoadingMoreNewsItens = true;
+							currentNewsListFragment.searchForNews(
+									((News) currentNewsListFragment
+											.getListView().getItemAtPosition(
+													totalItemCount - 1))
+											.getAfter(), false);
+						}
+					}
+				}
+			}
+
+		}
+
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

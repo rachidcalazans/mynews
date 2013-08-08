@@ -3,13 +3,17 @@ package br.com.maxwellfn.mynews;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import android.widget.AbsListView.OnScrollListener;
 import br.com.maxwellfn.mynews.NewsListFragment.OnNewsClickListener;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -63,8 +67,11 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 	}
 
 	public NewsListFragment instanceNewsList(Topic currentTopic,
-			OnNewsClickListener newsClickListener,
-			CurrentNewsListFragmentData currentNewsListFragmentData) {
+			CurrentNewsListFragmentData currentNewsListFragmentData,
+			boolean isTablet) {
+
+		OnNewsClickListener newsClickListener = (OnNewsClickListener) this;
+		OnScrollListener endlessScrollListener = (OnScrollListener) this;
 
 		NewsListFragment newsListFragment = (NewsListFragment) currentNewsListFragmentData
 				.getNewsListFragment();
@@ -73,19 +80,23 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 
 			newsListFragment = NewsListFragment.novaInstancia(
 					currentTopic.getUrl(),
-					currentNewsListFragmentData.getClassification(), "");
+					currentNewsListFragmentData.getClassification(), "",
+					isTablet);
 
 		}
 
 		addNewsList(newsListFragment, currentNewsListFragmentData.getTag());
 
 		newsListFragment.setNewsClickListener(newsClickListener);
+		newsListFragment.setEndLessScrollListener(endlessScrollListener);
 		return newsListFragment;
 	}
 
 	public FavoriteNewsListFragment instanceFavoriteNewsList(
-			OnNewsClickListener newsClickListener,
-			CurrentNewsListFragmentData currentNewsListFragmentData) {
+
+	CurrentNewsListFragmentData currentNewsListFragmentData) {
+
+		OnNewsClickListener newsClickListener = (OnNewsClickListener) this;
 
 		favoriteNewsListFragment = FavoriteNewsListFragment.novaInstancia();
 
@@ -96,7 +107,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 		return favoriteNewsListFragment;
 	}
 
-	public void replaceNewsLists(Topic topic) {
+	public void replaceNewsLists(Topic topic, boolean isTablet) {
 
 		switch (getSupportActionBar().getSelectedTab().getPosition()) {
 		case 0:
@@ -105,7 +116,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 					.remove(newsListFragment1).commit();
 
 			newsListFragment1 = NewsListFragment.novaInstancia(topic.getUrl(),
-					CLASSIFICATION_POPULARES, "");
+					CLASSIFICATION_POPULARES, "", isTablet);
 
 			getSupportFragmentManager()
 					.beginTransaction()
@@ -119,7 +130,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 					.remove(newsListFragment2).commit();
 
 			newsListFragment2 = NewsListFragment.novaInstancia(topic.getUrl(),
-					CLASSIFICATION_NOVOS, "");
+					CLASSIFICATION_NOVOS, "", isTablet);
 			getSupportFragmentManager()
 					.beginTransaction()
 					.replace(R.id.newsListsFrame, newsListFragment2,
@@ -131,7 +142,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 					.remove(newsListFragment3).commit();
 
 			newsListFragment3 = NewsListFragment.novaInstancia(topic.getUrl(),
-					CLASSIFICATION_SUBINDO, "");
+					CLASSIFICATION_SUBINDO, "", isTablet);
 			getSupportFragmentManager()
 					.beginTransaction()
 					.replace(R.id.newsListsFrame, newsListFragment3,
@@ -143,7 +154,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 					.remove(newsListFragment4).commit();
 
 			newsListFragment4 = NewsListFragment.novaInstancia(topic.getUrl(),
-					CLASSIFICATION_CONTROVERSOS, "");
+					CLASSIFICATION_CONTROVERSOS, "", isTablet);
 			getSupportFragmentManager()
 					.beginTransaction()
 					.replace(R.id.newsListsFrame, newsListFragment4,
@@ -155,7 +166,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 					.remove(newsListFragment5).commit();
 
 			newsListFragment5 = NewsListFragment.novaInstancia(topic.getUrl(),
-					CLASSIFICATION_NOTOPO, "");
+					CLASSIFICATION_NOTOPO, "", isTablet);
 			getSupportFragmentManager()
 					.beginTransaction()
 					.replace(R.id.newsListsFrame, newsListFragment5,
@@ -348,7 +359,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 	}
 
 	public void changeTab(FragmentTransaction ft, Topic currentTopic,
-			OnNewsClickListener newsClickListener, boolean isTablet) {
+			boolean isTablet) {
 
 		int position = actionBar.getSelectedTab().getPosition();
 
@@ -362,39 +373,38 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 								.getNewsListFragment(),
 						currentTopic)) {
 
-			replaceNewsLists(currentTopic);
+			replaceNewsLists(currentTopic, isTablet);
 
 		} else {
 
 			switch (position) {
 			case 0:
 				newsListFragment1 = instanceNewsList(currentTopic,
-						newsClickListener, currentNewsListFragmentData);
+						currentNewsListFragmentData, isTablet);
 				updateCurrentNewsListFragment(ft, newsListFragment1);
 				break;
 			case 1:
 				newsListFragment2 = instanceNewsList(currentTopic,
-						newsClickListener, currentNewsListFragmentData);
+						currentNewsListFragmentData, isTablet);
 				updateCurrentNewsListFragment(ft, newsListFragment2);
 				break;
 			case 2:
 				newsListFragment3 = instanceNewsList(currentTopic,
-						newsClickListener, currentNewsListFragmentData);
+						currentNewsListFragmentData, isTablet);
 				updateCurrentNewsListFragment(ft, newsListFragment3);
 				break;
 			case 3:
 				newsListFragment4 = instanceNewsList(currentTopic,
-						newsClickListener, currentNewsListFragmentData);
+						currentNewsListFragmentData, isTablet);
 				updateCurrentNewsListFragment(ft, newsListFragment4);
 				break;
 			case 4:
 				newsListFragment5 = instanceNewsList(currentTopic,
-						newsClickListener, currentNewsListFragmentData);
+						currentNewsListFragmentData, isTablet);
 				updateCurrentNewsListFragment(ft, newsListFragment5);
 				break;
 			case 5:
-				favoriteNewsListFragment = instanceFavoriteNewsList(
-						newsClickListener, currentNewsListFragmentData);
+				favoriteNewsListFragment = instanceFavoriteNewsList(currentNewsListFragmentData);
 				updateCurrentNewsListFragment(ft, favoriteNewsListFragment);
 				break;
 			default:
@@ -522,7 +532,7 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 		actionBar = getSupportActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		setActionBarLogoAndSubTitle(currentTopic);
+		new DownloadLogoTopicImageTask().execute(currentTopic.getUrl());
 
 		Tab tabs[] = new Tab[NUM_TABS];
 
@@ -569,31 +579,51 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 		}
 	}
 
-	public void setActionBarLogoAndSubTitle(Topic topic) {
+	public class DownloadLogoTopicImageTask extends
+			AsyncTask<String, Void, Drawable> {
 
-		actionBar.setSubtitle(topic.getDisplayName());
+		public DownloadLogoTopicImageTask() {
+		}
 
-		InputStream in = null;
-		Drawable d = null;
-		try {
-			if (isURLValid(topic.getHeaderImg())) {
-				in = new java.net.URL(topic.getHeaderImg()).openStream();
-				Bitmap bitmapTopicLogo = BitmapFactory.decodeStream(in);
-				d = new BitmapDrawable(getResources(), bitmapTopicLogo);
+		protected Drawable doInBackground(String... urls) {
+
+			InputStream in = null;
+			Drawable d = null;
+			String urlToDownload = urls[0];
+			if (isURLValid(urlToDownload)) {
+				URL url = null;
+
+				try {
+					url = new java.net.URL(urlToDownload);
+					in = url.openStream();
+					Bitmap bitmapTopicLogo = BitmapFactory.decodeStream(in);
+					d = new BitmapDrawable(getResources(), bitmapTopicLogo);
+				} catch (MalformedURLException e) {
+					Log.e("MYNEWS",
+							"Falhou instanciando URL do logo do t—pico (url=["
+									+ urlToDownload + "] exmsg=["
+									+ e.getMessage() + "]).");
+				} catch (IOException e) {
+					Log.e("MYNEWS",
+							"Falhou abrindo stream da URL do logo do t—pico (url=["
+									+ urlToDownload + "] exmsg=["
+									+ e.getMessage() + "]).");
+				}
+
 			}
 
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			return d;
 		}
 
-		if (d != null) {
-			actionBar.setDisplayUseLogoEnabled(true);
-			actionBar.setLogo(d);
-		} else {
-			actionBar.setDisplayUseLogoEnabled(false);
+		protected void onPostExecute(Drawable d) {
+			if (d != null) {
+				actionBar.setDisplayUseLogoEnabled(true);
+				actionBar.setLogo(d);
+			} else {
+				actionBar.setDisplayUseLogoEnabled(false);
 
+			}
 		}
 	}
+
 }

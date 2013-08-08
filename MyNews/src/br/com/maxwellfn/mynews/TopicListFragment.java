@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -42,6 +43,12 @@ public class TopicListFragment extends SherlockListFragment {
 
 	public void setTopicClickListener(OnTopicClickListener topicClickListener) {
 		this.topicClickListener = topicClickListener;
+	}
+
+	private OnScrollListener endLessScrollListener;
+
+	public void setEndLessScrollListener(OnScrollListener endLessScrollListener) {
+		this.endLessScrollListener = endLessScrollListener;
 	}
 
 	@Override
@@ -78,6 +85,11 @@ public class TopicListFragment extends SherlockListFragment {
 
 		setRetainInstance(true);
 
+		searchForTopics(after, true);
+
+	}
+
+	public void searchForTopics(String after, boolean isFirstFetchForTopics) {
 		ConnectivityManager manager = (ConnectivityManager) getActivity()
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -85,9 +97,9 @@ public class TopicListFragment extends SherlockListFragment {
 
 		if (info != null && info.isConnected()) {
 
-			if (task == null) {
+			if (task == null || !isFirstFetchForTopics) {
 				task = new TopicSearchTask();
-				task.execute(after);
+				task.execute(after, String.valueOf(isFirstFetchForTopics));
 			} else if (task.getStatus() == Status.RUNNING) {
 				progress.setVisibility(View.VISIBLE);
 			}
@@ -103,7 +115,6 @@ public class TopicListFragment extends SherlockListFragment {
 					.setPositiveButton("OK", null).create();
 			dialog.show();
 		}
-
 	}
 
 	@Override
@@ -122,6 +133,8 @@ public class TopicListFragment extends SherlockListFragment {
 
 	class TopicSearchTask extends AsyncTask<String, Void, List<Topic>> {
 
+		private boolean isFirstFetchForTopics = false;
+
 		private final String URL_TEMPLATE = "http://i.reddit.com/subreddits/.json"
 				+ "?after=AFTER";
 
@@ -134,6 +147,10 @@ public class TopicListFragment extends SherlockListFragment {
 		protected List<Topic> doInBackground(String... params) {
 
 			try {
+
+				if (params.length > 1) {
+					isFirstFetchForTopics = Boolean.valueOf(params[1]);
+				}
 
 				URL url = new URL(getURL(params[0]));
 				Log.d("MYNEWS", url.toString());
@@ -159,42 +176,35 @@ public class TopicListFragment extends SherlockListFragment {
 		private List<Topic> getTopicList(InputStream inputStream)
 				throws IOException, JSONException {
 			List<Topic> resultados = new ArrayList<Topic>();
-			long inicio, fim;
 
-			inicio = System.currentTimeMillis();
-			// Conecta com o servidor, abre o stream e converte pra stream
 			String jsonString = streamToString(inputStream);
-			fim = System.currentTimeMillis();
-			Log.d("MYNEWS", "(p1):" + (fim - inicio));
 
-			inicio = System.currentTimeMillis();
-			// Conecta com o servidor, abre o stream e converte pra stream
 			JSONObject jsonRoot = new JSONObject(jsonString);
-			fim = System.currentTimeMillis();
-			Log.d("MYNEWS", "(p2):" + (fim - inicio));
-
-			inicio = System.currentTimeMillis();
 
 			JSONObject jsonData = jsonRoot.getJSONObject("data");
+
 			String after = jsonData.getString("after");
 			JSONArray jsonChildren = jsonData.getJSONArray("children");
 
-			// Configura o primeiro TOPIC da lista
-			// que sempre ser‡ o FRONT padr‹o da primeira
-			// carga e que n‹o referencia SUBREDDITS.
-			Topic headerListTopic = new Topic();
+			if (isFirstFetchForTopics) {
 
-			headerListTopic.setDisplayName("Tudo");
-			headerListTopic.setTitle("Todas as postagens.");
-			headerListTopic
-					.setPublicDescription("Busca de todas as postagens sem filtro por t—picos.");
-			headerListTopic.setUrl("");
-			headerListTopic
-					.setHeaderImg("http://www.reddit.com/static/blog_snoo.png");
-			headerListTopic.setSubscribers(0);
-			headerListTopic.setAfter(after);
+				// Configura o primeiro TOPIC da lista
+				// que sempre ser‡ o FRONT padr‹o da primeira
+				// carga e que n‹o referencia SUBREDDITS.
+				Topic headerListTopic = new Topic();
 
-			resultados.add(headerListTopic);
+				headerListTopic.setDisplayName("Tudo");
+				headerListTopic.setTitle("Todas as postagens.");
+				headerListTopic
+						.setPublicDescription("Busca de todas as postagens sem filtro por t—picos.");
+				headerListTopic.setUrl("");
+				headerListTopic
+						.setHeaderImg("http://www.reddit.com/static/blog_snoo.png");
+				headerListTopic.setSubscribers(0);
+				headerListTopic.setAfter(after);
+
+				resultados.add(headerListTopic);
+			}
 
 			for (int i = 0; i < jsonChildren.length(); i++) {
 				Topic topic = new Topic();
@@ -226,9 +236,6 @@ public class TopicListFragment extends SherlockListFragment {
 				}
 			}
 
-			fim = System.currentTimeMillis();
-			Log.d("MYNEWS", "(p3):" + (fim - inicio));
-
 			return resultados;
 		}
 
@@ -243,11 +250,28 @@ public class TopicListFragment extends SherlockListFragment {
 		@Override
 		protected void onPostExecute(List<Topic> result) {
 			super.onPostExecute(result);
-			if (result != null) {
 
-				TopicAdapter topicAdapter = new TopicAdapter(getActivity(),
-						result);
-				setListAdapter(topicAdapter);
+			TopicAdapter topicAdapter = null;
+
+			if (result != null) {
+				if (isFirstFetchForTopics) {
+					topicAdapter = new TopicAdapter(getActivity(), result);
+					setListAdapter(topicAdapter);
+					getListView().setOnScrollListener(endLessScrollListener);
+				} else {
+					topicAdapter = (TopicAdapter) getListAdapter();
+
+					for (int i = 0; i < result.size(); i++) {
+						topicAdapter.add(result.get(i));
+					}
+
+					topicAdapter.notifyDataSetChanged();
+
+					synchronized (this) {
+						MainActivity.isLoadingMoreTopicItens = false;
+					}
+
+				}
 			} else {
 				txtMensagem.setVisibility(View.VISIBLE);
 				txtMensagem.setText("Nenhum t—pico encontrado.");

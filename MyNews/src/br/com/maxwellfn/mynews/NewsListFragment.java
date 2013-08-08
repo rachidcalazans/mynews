@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -34,43 +35,26 @@ public class NewsListFragment extends SherlockListFragment {
 	public static final String CLASSIFICATION = "classification";
 	public static final String TOPIC = "topic";
 	public static final String AFTER = "after";
+	public static final String ISTABLET = "istablet";
 
 	NewsSearchTask task;
 	ProgressBar progress;
 	TextView txtMensagem;
-
 	private String classification;
 	private String topic;
 	private String after;
-
-	public String getClassification() {
-		return classification;
-	}
-
-	public void setClassification(String classification) {
-		this.classification = classification;
-	}
-
-	public String getTopic() {
-		return topic;
-	}
-
-	public void setTopic(String topic) {
-		this.topic = topic;
-	}
-
-	public String getAfter() {
-		return after;
-	}
-
-	public void setAfter(String after) {
-		this.after = after;
-	}
+	boolean isTablet;
 
 	private OnNewsClickListener newsClickListener;
 
 	public void setNewsClickListener(OnNewsClickListener newsClickListener) {
 		this.newsClickListener = newsClickListener;
+	}
+
+	private OnScrollListener endLessScrollListener;
+
+	public void setEndLessScrollListener(OnScrollListener endLessScrollListener) {
+		this.endLessScrollListener = endLessScrollListener;
 	}
 
 	@Override
@@ -86,6 +70,9 @@ public class NewsListFragment extends SherlockListFragment {
 			if (savedInstanceState.containsKey(AFTER)) {
 				after = savedInstanceState.getString(AFTER);
 			}
+			if (savedInstanceState.containsKey(ISTABLET)) {
+				isTablet = savedInstanceState.getBoolean(ISTABLET);
+			}
 		}
 	}
 
@@ -99,6 +86,7 @@ public class NewsListFragment extends SherlockListFragment {
 		classification = getArguments().getString(CLASSIFICATION);
 		topic = getArguments().getString(TOPIC);
 		after = getArguments().getString(AFTER);
+		isTablet = getArguments().getBoolean(ISTABLET);
 
 		return layout;
 	}
@@ -109,13 +97,20 @@ public class NewsListFragment extends SherlockListFragment {
 		outState.putString(TOPIC, topic);
 		outState.putString(CLASSIFICATION, classification);
 		outState.putString(AFTER, after);
+		outState.putBoolean(ISTABLET, isTablet);
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		
+
 		setRetainInstance(true);
+
+		searchForNews(after, true);
+
+	}
+
+	public void searchForNews(String after, boolean isFirstFetchForNews) {
 
 		ConnectivityManager manager = (ConnectivityManager) getActivity()
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -124,9 +119,10 @@ public class NewsListFragment extends SherlockListFragment {
 
 		if (info != null && info.isConnected()) {
 
-			if (task == null) {
+			if (task == null || !isFirstFetchForNews) {
 				task = new NewsSearchTask();
-				task.execute(topic, classification, after);
+				task.execute(topic, classification, after,
+						String.valueOf(isFirstFetchForNews));
 			} else if (task.getStatus() == Status.RUNNING) {
 				progress.setVisibility(View.VISIBLE);
 			}
@@ -142,7 +138,6 @@ public class NewsListFragment extends SherlockListFragment {
 					.setPositiveButton("OK", null).create();
 			dialog.show();
 		}
-
 	}
 
 	@Override
@@ -160,22 +155,22 @@ public class NewsListFragment extends SherlockListFragment {
 	}
 
 	public static NewsListFragment novaInstancia(String topic,
-			String classification, String after) {
+			String classification, String after, boolean isTablet) {
 		Bundle params = new Bundle();
 		params.putString(TOPIC, topic);
 		params.putString(CLASSIFICATION, classification);
 		params.putString(AFTER, after);
+		params.putBoolean(ISTABLET, isTablet);
 
 		NewsListFragment newsListFragment = new NewsListFragment();
 		newsListFragment.setArguments(params);
-		newsListFragment.setTopic(topic);
-		newsListFragment.setClassification(classification);
-		newsListFragment.setAfter(after);
 
 		return newsListFragment;
 	}
 
 	class NewsSearchTask extends AsyncTask<String, Void, List<News>> {
+
+		private boolean isFirstFetchForNews = false;
 
 		private final String URL_TEMPLATE = "http://i.reddit.comTOPIC#CLASSIFICATION.json"
 				+ "?after=AFTER";
@@ -199,7 +194,12 @@ public class NewsListFragment extends SherlockListFragment {
 
 			try {
 
+				if (params.length > 3) {
+					isFirstFetchForNews = Boolean.valueOf(params[3]);
+				}
+
 				URL url = new URL(getURL(params[0], params[1], params[2]));
+
 				Log.d("MYNEWS", url.toString());
 
 				HttpURLConnection conexao = (HttpURLConnection) url
@@ -222,7 +222,7 @@ public class NewsListFragment extends SherlockListFragment {
 
 		private List<News> getNewsList(InputStream inputStream)
 				throws IOException, JSONException {
-			List<News> resultados = new ArrayList<News>();
+			List<News> newsList = new ArrayList<News>();
 
 			String jsonString = streamToString(inputStream);
 
@@ -262,12 +262,12 @@ public class NewsListFragment extends SherlockListFragment {
 				}
 
 				if (isNewsValid) {
-					resultados.add(news);
+					newsList.add(news);
 
 				}
 			}
 
-			return resultados;
+			return newsList;
 		}
 
 		@Override
@@ -281,10 +281,32 @@ public class NewsListFragment extends SherlockListFragment {
 		@Override
 		protected void onPostExecute(List<News> result) {
 			super.onPostExecute(result);
-			if (result != null) {
 
-				NewsAdapter newsAdapter = new NewsAdapter(getActivity(), result);
-				setListAdapter(newsAdapter);
+			NewsAdapter newsAdapter = null;
+
+			if (result != null) {
+				if (isFirstFetchForNews) {
+					newsAdapter = new NewsAdapter(getActivity(), result);
+					setListAdapter(newsAdapter);
+					getListView().setOnScrollListener(endLessScrollListener);
+				} else {
+					newsAdapter = (NewsAdapter) getListAdapter();
+
+					for (int i = 0; i < result.size(); i++) {
+						newsAdapter.add(result.get(i));
+					}
+
+					newsAdapter.notifyDataSetChanged();
+
+					synchronized (this) {
+						if (isTablet) {
+							MainActivity.isLoadingMoreNewsItens = false;
+						} else {
+							SmartphoneNewsListsActivity.isLoadingMoreNewsItens = false;
+						}
+					}
+
+				}
 			} else {
 				txtMensagem.setVisibility(View.VISIBLE);
 				txtMensagem.setText("Nenhuma postagem encontrada.");

@@ -14,19 +14,18 @@ import android.widget.Toast;
 
 public class DbRepository {
 
-	private DbHelper helper;
 	Context context;
 	public static News newsToRemove;
 	public static FavoriteNewsListFragment favoriteNewsListFragment;
 
 	public DbRepository(Context context) {
-		helper = new DbHelper(context);
 		this.context = context;
 	}
 
-	public void add(News news, FavoriteNewsListFragment favoriteNewsListFragment) {
+	public boolean add(News news, FavoriteNewsListFragment favoriteNewsListFragment) {
 
 		DbRepository.favoriteNewsListFragment = favoriteNewsListFragment;
+		boolean addedOk = false; 
 
 		if (getNewsById(news.getId()) == null) {
 
@@ -37,9 +36,10 @@ public class DbRepository {
 			cv.put("thumbnail", news.getThumbnail());
 			cv.put("id", news.getId());
 
-			SQLiteDatabase db = helper.getWritableDatabase();
+			SQLiteDatabase db = DbHelper.getInstance(context)
+					.getWritableDatabase();
 
-			long id = db.insert(DbHelper.TABLE_NAME_FAVORITA, null, cv);
+			long id = db.insert(DbHelper.TABLENAME_MYNEWS, null, cv);
 
 			db.close();
 
@@ -50,9 +50,13 @@ public class DbRepository {
 								Toast.LENGTH_LONG);
 				toastMsg.setGravity(Gravity.CENTER, 0, 0);
 				toastMsg.show();
+			} else {
+				addedOk = true;
 			}
 
 		}
+		
+		return addedOk;
 	}
 
 	public void remove(News news,
@@ -124,11 +128,11 @@ public class DbRepository {
 	public News getNewsById(String id, boolean isDbId) {
 		News news = null;
 
-		SQLiteDatabase db = helper.getReadableDatabase();
+		SQLiteDatabase db = DbHelper.getInstance(context).getReadableDatabase();
 
 		Cursor cursor;
 
-		cursor = db.rawQuery("select * from " + DbHelper.TABLE_NAME_FAVORITA
+		cursor = db.rawQuery("select * from " + DbHelper.TABLENAME_MYNEWS
 				+ " where " + (isDbId ? "_id" : "id") + " = ?",
 				new String[] { id });
 
@@ -184,10 +188,10 @@ public class DbRepository {
 
 		List<News> favoriteNewsList = new ArrayList<News>();
 
-		SQLiteDatabase db = helper.getReadableDatabase();
+		SQLiteDatabase db = DbHelper.getInstance(context).getReadableDatabase();
 
 		Cursor cursor = db.rawQuery("select * from "
-				+ DbHelper.TABLE_NAME_FAVORITA, null);
+				+ DbHelper.TABLENAME_MYNEWS, null);
 
 		while (cursor.moveToNext()) {
 
@@ -204,13 +208,16 @@ public class DbRepository {
 		return favoriteNewsList;
 	}
 
-	private void remove(News news) {
+	private boolean remove(News news) {
+		
+		boolean removedOk = false;
 
 		if (news != null) {
 
-			SQLiteDatabase db = helper.getWritableDatabase();
+			SQLiteDatabase db = DbHelper.getInstance(context)
+					.getWritableDatabase();
 
-			int idRet = db.delete(DbHelper.TABLE_NAME_FAVORITA, "id = ?",
+			int idRet = db.delete(DbHelper.TABLENAME_MYNEWS, "id = ?",
 					new String[] { String.valueOf(DbRepository.newsToRemove
 							.getId()) });
 
@@ -224,8 +231,12 @@ public class DbRepository {
 
 				toastMsg.setGravity(Gravity.CENTER, 0, 0);
 				toastMsg.show();
+			} else {
+				removedOk = true;
 			}
 		}
+		
+		return removedOk;
 	}
 
 }

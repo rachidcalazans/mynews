@@ -10,7 +10,7 @@ public class News implements Serializable {
 	private static final long serialVersionUID = -1338834187656220329L;
 
 	private String id;
-	
+
 	public String getId() {
 		return id;
 	}
@@ -46,10 +46,8 @@ public class News implements Serializable {
 	private String after;
 
 	private int dbId;
-	
+
 	private boolean isFavorite;
-	
-	
 
 	public boolean isFavorite() {
 		return isFavorite;
@@ -101,12 +99,9 @@ public class News implements Serializable {
 	}
 
 	public String getThumbnail() {
-		if (thumbnail != null && thumbnail.trim().length() > 0
-				&& !thumbnail.equalsIgnoreCase("default")) {
-			return thumbnail;
-		} else {
-			return "http://www.reddit.com/static/blog_snoo.png";
-		}
+
+		return thumbnail;
+
 	}
 
 	public void setThumbnail(String thumbnail) {

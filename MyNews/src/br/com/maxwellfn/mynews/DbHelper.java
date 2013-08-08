@@ -6,18 +6,35 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DbHelper extends SQLiteOpenHelper {
 
-	public static final String TABLE_NAME_FAVORITA = "favorita";
-	public static final String DB_MY_NEWS = "dbMyNews";
+	private static DbHelper mInstance = null;
 
-	public DbHelper(Context context) {
+	private static final String DB_NAME = "favorita";
+	public static final String TABLENAME_MYNEWS = "dbMyNews";
+	private static final int DB_VERSION = 1;
 
-		super(context, DB_MY_NEWS, null, 1);
+	public static DbHelper getInstance(Context ctx) {
+
+		// Use the application context, which will ensure that you
+		// don't accidentally leak an Activity's context.
+		// See this article for more information: http://bit.ly/6LRzfx
+		if (mInstance == null) {
+			mInstance = new DbHelper(ctx.getApplicationContext());
+		}
+		return mInstance;
+	}
+
+	/**
+	 * Constructor should be private to prevent direct instantiation. make call
+	 * to static factory method "getInstance()" instead.
+	 */
+	private DbHelper(Context ctx) {
+		super(ctx, DB_NAME, null, DB_VERSION);
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL("create table "
-				+ TABLE_NAME_FAVORITA
+				+ TABLENAME_MYNEWS
 				+ "(_id integer primary key autoincrement,title text, subreddit text, id text, url text, thumbnail text)");
 	}
 

@@ -64,7 +64,7 @@ public class NewsAdapter extends ArrayAdapter<News> {
 
 								imgFavoriteIcon
 										.setImageResource(android.R.drawable.btn_star_big_off);
-
+								
 							} else {
 
 								repo.add(news,

@@ -7,17 +7,22 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import br.com.maxwellfn.mynews.NewsListFragment.OnNewsClickListener;
 
 import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.MenuItem;
 
 public class SmartphoneNewsListsActivity extends NewsListsFragmentManager
-		implements OnNewsClickListener {
+		implements OnNewsClickListener, OnScrollListener {
 
 	private Topic currentTopic;
 	News currentNews;
+
+	public static boolean isLoadingMoreNewsItens = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +60,8 @@ public class SmartphoneNewsListsActivity extends NewsListsFragmentManager
 				newsListFragment1, CLASSIFICATION_POPULARES,
 				TAG_FRAGMENT_NEWS_LIST1);
 
-		newsListFragment1 = instanceNewsList(currentTopic, this,
-				firstNewsListFragmentData);
+		newsListFragment1 = instanceNewsList(currentTopic,
+				firstNewsListFragmentData, false);
 
 		configTabs(false, false, currentTopic);
 
@@ -87,7 +92,7 @@ public class SmartphoneNewsListsActivity extends NewsListsFragmentManager
 
 	@Override
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
-		changeTab(ft, currentTopic, this, false);
+		changeTab(ft, currentTopic, false);
 
 	}
 
@@ -116,13 +121,44 @@ public class SmartphoneNewsListsActivity extends NewsListsFragmentManager
 				.getItemAtPosition(info.position);
 
 		if (item.getItemId() == R.id.favoriteItemListContextMenuOptionRemove) {
-			
+
 			DbRepository repo = new DbRepository(this);
-			
+
 			repo.remove(selectedNews, favoriteNewsListFragment);
 
 		}
 
 		return super.onContextItemSelected(item);
+	}
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		CurrentNewsListFragmentData currentNewsListFragmentData = getCurrentNewsListFragment();
+		SherlockListFragment currentListFragment = currentNewsListFragmentData
+				.getNewsListFragment();
+
+		if (currentListFragment instanceof NewsListFragment) {
+
+			NewsListFragment currentNewsListFragment = (NewsListFragment) currentListFragment;
+
+			if (firstVisibleItem + visibleItemCount >= totalItemCount
+					&& totalItemCount != 0) {
+				if (isLoadingMoreNewsItens == false) {
+					isLoadingMoreNewsItens = true;
+					currentNewsListFragment.searchForNews(
+							((News) currentNewsListFragment.getListView()
+									.getItemAtPosition(totalItemCount - 1))
+									.getAfter(), false);
+				}
+			}
+		}
+
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		// TODO Auto-generated method stub
+
 	}
 }
