@@ -35,6 +35,10 @@ public class SmartphoneNewsListsActivity extends NewsListsFragmentManager
 		setContentView(R.layout.activity_lists_news_smartphone);
 
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		new DownloadLogoTopicImageTask().execute(currentTopic
+				.getHeaderImg());
+		getSupportActionBar().setSubtitle(currentTopic.getDisplayName());
 
 		// Configura fragmento de favoritas
 
@@ -124,7 +128,7 @@ public class SmartphoneNewsListsActivity extends NewsListsFragmentManager
 
 			DbRepository repo = new DbRepository(this);
 
-			repo.remove(selectedNews, favoriteNewsListFragment);
+			repo.unfavoriteNews(selectedNews, favoriteNewsListFragment);
 
 		}
 

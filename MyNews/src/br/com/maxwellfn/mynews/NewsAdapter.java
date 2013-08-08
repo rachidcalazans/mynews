@@ -21,7 +21,7 @@ public class NewsAdapter extends ArrayAdapter<News> {
 		this.mainActivity = (NewsListsFragmentManager) context;
 
 	}
-	
+
 	@Override
 	public void remove(News object) {
 		// TODO Auto-generated method stub
@@ -42,47 +42,14 @@ public class NewsAdapter extends ArrayAdapter<News> {
 			holder.imgNewsFavoriteIcon = (ImageView) convertView
 					.findViewById(R.id.imgNewsFavoriteIcon);
 
-			holder.imgNewsFavoriteIcon.setTag(news);
-
-			holder.imgNewsFavoriteIcon
-					.setOnClickListener(new OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-
-							News news = (News) v.getTag();
-
-							ImageView imgFavoriteIcon = (ImageView) v;
-
-							DbRepository repo = new DbRepository(mainActivity);
-
-							if (repo.getNewsById(news.getId()) != null) {
-
-								repo.remove(news,
-										mainActivity.favoriteNewsListFragment,
-										true);
-
-								imgFavoriteIcon
-										.setImageResource(android.R.drawable.btn_star_big_off);
-								
-							} else {
-
-								repo.add(news,
-										mainActivity.favoriteNewsListFragment);
-
-								imgFavoriteIcon
-										.setImageResource(android.R.drawable.btn_star_big_on);
-
-							}
-
-						}
-					});
-
 			holder.txtNewsTitle = (TextView) convertView
 					.findViewById(R.id.txtNewsTitle);
 
 			holder.txtNewsSubreddit = (TextView) convertView
 					.findViewById(R.id.txtNewsSubreddit);
+
+			holder.txtNewsId = (TextView) convertView
+					.findViewById(R.id.txtNewsId);
 
 			convertView.setTag(holder);
 		} else {
@@ -112,6 +79,41 @@ public class NewsAdapter extends ArrayAdapter<News> {
 
 		holder.txtNewsTitle.setText(news.getTitle());
 		holder.txtNewsSubreddit.setText(news.getSubreddit());
+		holder.txtNewsId.setText(news.getId());
+
+		holder.imgNewsFavoriteIcon.setTag(news);
+
+		holder.imgNewsFavoriteIcon.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				News news = (News) v.getTag();
+
+				ImageView imgFavoriteIcon = (ImageView) v;
+
+				DbRepository repo = new DbRepository(mainActivity);
+
+				if (repo.getNewsById(news.getId()) != null) {
+
+					repo.unfavoriteNews(news,
+							mainActivity.favoriteNewsListFragment, true);
+
+					imgFavoriteIcon
+							.setImageResource(android.R.drawable.btn_star_big_off);
+
+				} else {
+
+					repo.favoriteNews(news,
+							mainActivity.favoriteNewsListFragment);
+
+					imgFavoriteIcon
+							.setImageResource(android.R.drawable.btn_star_big_on);
+
+				}
+
+			}
+		});
 
 		return convertView;
 	}
@@ -121,6 +123,7 @@ public class NewsAdapter extends ArrayAdapter<News> {
 		ImageView imgNewsFavoriteIcon;
 		TextView txtNewsTitle;
 		TextView txtNewsSubreddit;
+		TextView txtNewsId;
 	}
 
 }

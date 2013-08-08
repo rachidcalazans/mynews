@@ -7,6 +7,10 @@
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    <!-- android:cacheColorHint="@android:color/transparent" -->
+    <!-- android:divider="@android:color/transparent" -->
+    <!-- android:dividerHeight="10dp" -->
+    <!-- android:listSelector="@android:color/transparent" -->
 
     <TextView
         android:id="@+id/txtMensagem"

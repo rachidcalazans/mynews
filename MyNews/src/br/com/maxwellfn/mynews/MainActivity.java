@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ListView;
 import br.com.maxwellfn.mynews.NewsListFragment.OnNewsClickListener;
 import br.com.maxwellfn.mynews.TopicListFragment.OnTopicClickListener;
 
@@ -26,7 +25,7 @@ public class MainActivity extends NewsListsFragmentManager implements
 
 	public static final String TAG_FRAGMENT_TOPIC_LIST = "topicListFragment";
 
-	TopicListFragment topicListFragment;
+	public TopicListFragment topicListFragment;
 
 	public static boolean isLoadingMoreNewsItens = false;
 	public static boolean isLoadingMoreTopicItens = false;
@@ -131,7 +130,7 @@ public class MainActivity extends NewsListsFragmentManager implements
 
 			DbRepository repo = new DbRepository(this);
 
-			repo.remove(selectedNews, favoriteNewsListFragment);
+			repo.unfavoriteNews(selectedNews, favoriteNewsListFragment);
 
 		}
 
@@ -165,6 +164,7 @@ public class MainActivity extends NewsListsFragmentManager implements
 		if (isTablet()) {
 			new DownloadLogoTopicImageTask().execute(currentTopic
 					.getHeaderImg());
+			actionBar.setSubtitle(currentTopic.getDisplayName());
 			replaceNewsLists(currentTopic, true);
 
 		} else {
@@ -192,7 +192,7 @@ public class MainActivity extends NewsListsFragmentManager implements
 		if (view == topicListFragment.getListView()) {
 			// O scrolling foi na lista de t—picos
 
-			if (firstVisibleItem + visibleItemCount >= totalItemCount
+			if (firstVisibleItem + visibleItemCount == totalItemCount
 					&& totalItemCount != 0) {
 				if (isLoadingMoreTopicItens == false) {
 					isLoadingMoreTopicItens = true;
@@ -219,7 +219,7 @@ public class MainActivity extends NewsListsFragmentManager implements
 
 					NewsListFragment currentNewsListFragment = (NewsListFragment) currentListFragment;
 
-					if (firstVisibleItem + visibleItemCount >= totalItemCount
+					if (firstVisibleItem + visibleItemCount == totalItemCount
 							&& totalItemCount != 0) {
 						if (isLoadingMoreNewsItens == false) {
 							isLoadingMoreNewsItens = true;

@@ -8,15 +8,13 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	private static DbHelper mInstance = null;
 
-	private static final String DB_NAME = "favorita";
-	public static final String TABLENAME_MYNEWS = "dbMyNews";
+	private static final String DB_NAME = "mynews";
+	public static final String TB_NEWS = "news";
+	public static final String TB_TOPIC = "topic";
 	private static final int DB_VERSION = 1;
 
 	public static DbHelper getInstance(Context ctx) {
 
-		// Use the application context, which will ensure that you
-		// don't accidentally leak an Activity's context.
-		// See this article for more information: http://bit.ly/6LRzfx
 		if (mInstance == null) {
 			mInstance = new DbHelper(ctx.getApplicationContext());
 		}
@@ -33,9 +31,14 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
+
 		db.execSQL("create table "
-				+ TABLENAME_MYNEWS
+				+ TB_NEWS
 				+ "(_id integer primary key autoincrement,title text, subreddit text, id text, url text, thumbnail text)");
+
+		db.execSQL("create table "
+				+ TB_TOPIC
+				+ "(_id integer primary key autoincrement,displayname text, publicdesc text, id text, url text, headerimg text)");
 	}
 
 	@Override

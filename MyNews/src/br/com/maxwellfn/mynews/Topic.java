@@ -33,6 +33,16 @@ public class Topic implements Serializable {
 
 	private String after;
 
+	private int dbId;
+
+	public int getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(int dbId) {
+		this.dbId = dbId;
+	}
+
 	public int getSubscribers() {
 		return subscribers;
 	}

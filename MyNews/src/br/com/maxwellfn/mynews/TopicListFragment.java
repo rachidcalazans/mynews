@@ -177,14 +177,7 @@ public class TopicListFragment extends SherlockListFragment {
 				throws IOException, JSONException {
 			List<Topic> resultados = new ArrayList<Topic>();
 
-			String jsonString = streamToString(inputStream);
-
-			JSONObject jsonRoot = new JSONObject(jsonString);
-
-			JSONObject jsonData = jsonRoot.getJSONObject("data");
-
-			String after = jsonData.getString("after");
-			JSONArray jsonChildren = jsonData.getJSONArray("children");
+			DbRepository repo = new DbRepository(getActivity());
 
 			if (isFirstFetchForTopics) {
 
@@ -194,6 +187,7 @@ public class TopicListFragment extends SherlockListFragment {
 				Topic headerListTopic = new Topic();
 
 				headerListTopic.setDisplayName("Tudo");
+				headerListTopic.setId("tudo");
 				headerListTopic.setTitle("Todas as postagens.");
 				headerListTopic
 						.setPublicDescription("Busca de todas as postagens sem filtro por t—picos.");
@@ -204,7 +198,29 @@ public class TopicListFragment extends SherlockListFragment {
 				headerListTopic.setAfter(after);
 
 				resultados.add(headerListTopic);
+
+				// Vamos iniciar a lista de t—pico com os
+				// favoritados vindos do BD
+
+				List<Topic> favoriteTopicList = repo.getFavoriteTopicList();
+
+				if (favoriteTopicList != null) {
+
+					for (int i = 0; i < favoriteTopicList.size(); i++) {
+						resultados.add(favoriteTopicList.get(i));
+					}
+
+				}
 			}
+
+			String jsonString = streamToString(inputStream);
+
+			JSONObject jsonRoot = new JSONObject(jsonString);
+
+			JSONObject jsonData = jsonRoot.getJSONObject("data");
+
+			String after = jsonData.getString("after");
+			JSONArray jsonChildren = jsonData.getJSONArray("children");
 
 			for (int i = 0; i < jsonChildren.length(); i++) {
 				Topic topic = new Topic();
@@ -219,6 +235,7 @@ public class TopicListFragment extends SherlockListFragment {
 				topic.setUrl(jsonNews.getString("url"));
 				topic.setHeaderImg(jsonNews.getString("header_img"));
 				topic.setSubscribers(jsonNews.getInt("subscribers"));
+				topic.setId(jsonNews.getString("id"));
 				topic.setAfter(after);
 
 				boolean isTopicValid = true;
@@ -229,7 +246,7 @@ public class TopicListFragment extends SherlockListFragment {
 							+ topic.getUrl() + "]");
 				}
 
-				if (isTopicValid) {
+				if (isTopicValid && repo.getTopicById(topic.getId()) == null) {
 
 					resultados.add(topic);
 
@@ -263,9 +280,8 @@ public class TopicListFragment extends SherlockListFragment {
 
 					for (int i = 0; i < result.size(); i++) {
 						topicAdapter.add(result.get(i));
+						topicAdapter.notifyDataSetChanged();
 					}
-
-					topicAdapter.notifyDataSetChanged();
 
 					synchronized (this) {
 						MainActivity.isLoadingMoreTopicItens = false;

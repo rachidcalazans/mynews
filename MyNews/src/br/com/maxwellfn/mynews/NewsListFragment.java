@@ -294,9 +294,8 @@ public class NewsListFragment extends SherlockListFragment {
 
 					for (int i = 0; i < result.size(); i++) {
 						newsAdapter.add(result.get(i));
+						newsAdapter.notifyDataSetChanged();
 					}
-
-					newsAdapter.notifyDataSetChanged();
 
 					synchronized (this) {
 						if (isTablet) {

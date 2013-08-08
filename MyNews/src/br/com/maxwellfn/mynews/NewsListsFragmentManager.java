@@ -617,10 +617,10 @@ public class NewsListsFragmentManager extends SherlockFragmentActivity
 
 		protected void onPostExecute(Drawable d) {
 			if (d != null) {
-				actionBar.setDisplayUseLogoEnabled(true);
-				actionBar.setLogo(d);
+				getSupportActionBar().setDisplayUseLogoEnabled(true);
+				getSupportActionBar().setLogo(d);
 			} else {
-				actionBar.setDisplayUseLogoEnabled(false);
+				getSupportActionBar().setDisplayUseLogoEnabled(false);
 
 			}
 		}
